@@ -1,0 +1,78 @@
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+html, body{
+	margin: auto 0;
+	padding: 0;
+
+	background-color: lightgrey;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+h1{
+	text-align: center;
+}
+
+#wrap{
+	width: 100%;
+	height: 100%;
+	border: solid 1em green;
+}
+
+#start{
+	width: 100px;
+	background-color: green;
+	height: 20%;
+}
+#stop{
+	width: 100px;
+	background-color: red;
+	height: 20%;
+}
+
+.noUi-target{
+	background-color: lightgreen;
+}
+
+.noUi-handle{
+	background-color: darkblue;
+}
+
+#osc_world{
+	width: 100%;
+	height: 100%;
+	border: 1px red solid;
+}
+
+.freq_input{
+	text-align: center;
+	margin-bottom: 5%;
+}
+
+#osc_1_text,#osc_2_text{
+	width: 50%;
+	text-align: center;
+	font-size: 2em;
+}
+
+#osc_1_div{
+	float: left;
+	width: 50%;
+	padding: 5%;
+}
+
+#osc_2_div{
+	float: left;
+	width: 50%;
+	padding: 5%;
+
+}
