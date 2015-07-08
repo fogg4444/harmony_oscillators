@@ -38,23 +38,9 @@ function initSliders(){
 }
 
 
-
 function incrementDecrement(slider_name, new_val){
-
-
-	function counter(slider_name, incDecValue){
-		
-		// clearInterval(slider_name)
-		console.log('stop: '+ slider_name + incDecValue)
-
-		if (incDecValue !== undefined) {
-			console.log('go: '+ slider_name + incDecValue)
-			// slider_name = setInterval(function(){ console.log('interval running' + incDecValue)}, 500)
-		}
-	}
-
-
 	normalized50 = (new_val - 50) / 50 // get down to a -1, +1 float variable
+	
 	if (normalized50 > 0 || normalized50 < 0) {
 		// console.log('greater or less than ' + normalized50)
 		counter(slider_name, normalized50)
@@ -64,7 +50,15 @@ function incrementDecrement(slider_name, new_val){
 	}
 }
 
-
+// Here's the problem spot.
+function counter(slider_name, incDecValue){		
+	// clearInterval(slider_name)
+	console.log('stop: '+ slider_name +" -- " +  incDecValue)
+	if (incDecValue !== undefined) {
+		console.log('go:   '+ slider_name + " -- " + incDecValue)
+		// slider_name = setInterval(function(){ console.log('interval running' + incDecValue)}, 500)
+	}
+}
 
 function resetSliders(){
 	slider_1.noUiSlider.set(50)
