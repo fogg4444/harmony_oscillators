@@ -22,3 +22,5 @@ In development
 	The console is giving a pretty good readout of the current data right now.
 
 	Hope i've explained that well enough...
+
+Live version here. might not be the latest though: http://brianfogg.com/sub/harmony_oscillators/
