@@ -34,3 +34,19 @@ function counter(slider_name, incDecValue){
 // that's probably a problem for this function if it's out in the general scope
 //
 // I also have not yet installed the map variable. 
+
+
+
+<div id="osc_1_div">
+	<div class="freq_input">
+		<input id="osc_1_text" type="text">
+	</div>
+	<div id="slider_1" class="h_slider"></div>
+</div>
+
+<div id="osc_2_div">
+	<div class="freq_input">
+		<input id="osc_2_text" type="text">
+	</div>
+	<div id="slider_2" class="h_slider"></div>
+</div>
