@@ -1,14 +1,34 @@
 Tone.Master.mute = true; // this needs to go first to avoid any clicking
 
+var equal_temp_interval_fraction_list = { // little library for keeping track of equal temperment ratios
+	'Unison' : '1/1',
+	'Minor_Second'   : '16/15',
+	'Major_Second'   : '9/8',
+	'Minor_Third'    : '6/5',
+	'Major_Third'    : '5/4',
+	'Perfect_Fourth' : '4/3',
+	'Tritone'        : '7/5',
+	'Perfect_Fifth'  : '3/2',
+	'Minor Sixth'    : '8/5',
+	'Major_Sixth'    : '5/3',
+	'Minor_Seventh'  : '16/9',
+	'Major_Seventh'  : '15/8',
+	'Octave'         : '2/1',
+
+}
+
+var current_osc_values = {} // global memory for osc values. enables referencing by other math
+
+
 
 var isNumeric = function(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
-}
+} // end isNumeric
 
 var resizeWindow = function(){ // keeping the css height at 100%
 	var window_height_px = $(window).outerHeight(true)  + "px";
 	$("#wrap").css('height', window_height_px);
-}
+} // end resize Window
 
 
 var osc_count = 2;
@@ -29,8 +49,7 @@ var initSliders = function(){
 			}
 		});
 	});
-
-}
+}; // end initSliders
 
 var resetSlider = function(){
 	// console.log('reset slider');
@@ -38,13 +57,13 @@ var resetSlider = function(){
 		var dom_input = document.getElementById(input)
 		dom_input.noUiSlider.set(50);
 	});
-}
+}; // end resetSlider
 
 var initMouseTouchUp = function(){
 	$(window).bind('mouseup touchend', function(){ // bind any completion of input to slider reset function
 		resetSlider();
 	});
-}
+}; // end initMouseTouchUp
 
 var generateOscAndPan = function(){
 
@@ -56,18 +75,17 @@ var generateOscAndPan = function(){
 		window[x] = new Tone.Oscillator(440, 'sine').connect(window[this_panner]).start();
 		// console.log( window[x] );
 	});
-}
+}; // end generateOscAndPan
 
-var initSliderListener = function(){
+var initSliderListener = function(){  // this whole section needs a lot of help... closures and things on the set interval
 	// console.log(slider_list)
 	console.log('==============================');
-
 
 
 	var counter = function(id, value){
 		// console.log('bang counter: ' + id + value)
 		var func = function(id, value){
-			console.log(' inside func  -- ' + id +' --- ' + value )
+			// console.log(' inside func  -- ' + id +' --- ' + value )
 		}
 		return func
 	}
@@ -92,11 +110,10 @@ var initSliderListener = function(){
 
 		});
 	});
-}
+}; // end initSliderListner
 
 
 var initMuteButton = function(){
-
 	if (Tone.Master.mute === false){ // initial coloring
 		$('#mute_button').css('background-color', 'green');
 	}else{
@@ -112,14 +129,50 @@ var initMuteButton = function(){
 			$(this).css('background-color', 'red');
 		};
 	})
-};
+}; // end initMuteButton
 
 
 $(document).ready(function(){
 	console.log("document ready");
 
-	var generateOscWorldHTML = function(){
+	var initIntervalFractionSelect = function(){
+		var fraction_select_menu = $('#interval_fraction_select');
 
+		for( var x in equal_temp_interval_fraction_list){ // loop through equal_temp_interval_fraction_list and generate options in list
+			var interval_name = x;
+			var interval_name_no_underscore = interval_name.replace(/[_]/g, " ")
+			var fraction = equal_temp_interval_fraction_list[x];
+
+			fraction_select_menu
+				.append( $("<option></option>")
+					.attr('value', interval_name)
+					.text(interval_name_no_underscore) );
+		}
+
+		fraction_select_menu.change(function(){ // on equal tempered menu change run this
+			var selection_key = $(this).val();
+			var selection_index = equal_temp_interval_fraction_list[selection_key];
+			var fraction_format = selection_index
+				.split('/')
+				.reverse()
+				.map(function(x){
+					//console.log(x);
+					return parseFloat(x);
+				});
+			fraction_format = fraction_format.map(function(x){ // formatting the fractions into useable arrays for multiplication
+				return x / fraction_format[0];
+			})
+			var multiplier = fraction_format[1];
+			console.log(multiplier)
+			var first_osc_value = parseFloat(current_osc_values['osc_1']);
+
+			var new_osc_2 = first_osc_value * multiplier;
+			console.log(new_osc_2);
+			setOsc(new_osc_2, 'osc_2');
+		});
+	} // end initIntervalFractionSelect
+
+	var generateOscWorldHTML = function(){
 		for(var i = 1; i <= osc_count; i++){  // generate lists of data to be reerenced by other functions
 			var osc_name = 'osc_' + i;
 			osc_list.push(osc_name);
@@ -132,37 +185,29 @@ $(document).ready(function(){
 
 			// generate all the html inside osc world div here
 			$('#osc_world').append('<div id=' + osc_name + '><div class="freq_input"><input id=' + osc_text + ' type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
-		
 			initText(osc_text, osc_name);
 		};
+	} // end GenerateOscWOrldHTML
+
+	var setText = function(freq, name){
+		console.log('set text firing')
+		console.log(freq, name)
+		var text_input = name + '_text';
+		console.log( text_input )
 	}
 
-	var initText = function(osc_text, osc_name){
-
-		var dom_input = document.getElementById(osc_text);
-		$(dom_input).val('440'); // set to default frequency
-		setMath()
-
-		$(dom_input).bind('change paste keyup', function(){ // bind any change in the text input to a function
-			console.log(osc_name);
-			var freq = $(this).val();
-			setOsc(freq, osc_name);
-			setMath(freq, osc_name);
-		});
-
-		var setOsc = function(freq, name){ // this needs to be fixed
-			if ( $.isNumeric(freq) ){
-				console.log('set osc');
-				console.log(name);
-				console.log(freq);
-				window[name].frequency.value = freq; // this needs help here...
-			};
-		}
+	var setOsc = function(freq, name){ // this needs to be fixed
+		if ( $.isNumeric(freq) ){
+			console.log('set osc');
+			console.log(name);
+			console.log(freq);
+			current_osc_values[name] = freq; // dump the value into the global variable
+			window[name].frequency.value = freq; // this needs help here...
+			setMath(freq, name);
+			setText(freq, name)
+		}; // end setOsc
 	};
-
-
 	var setMath = function(freq, osc_name){
-
 		if (osc_name === undefined){
 			// reset all to 440
 			$('#osc_1_math').html(440);
@@ -178,14 +223,37 @@ $(document).ready(function(){
 				$(this_osc_math_id).html(freq)
 			};
 		};
-
 		var osc_1_input = parseFloat( $('#osc_1_math').text() );
 		var osc_2_input = parseFloat( $('#osc_2_math').text() );
 
 		var result = Math.abs( osc_1_input - osc_2_input ) ;
 		$('#result').html(result)
+	};// end setMath
 
-	};
+	var initText = function(osc_text, osc_name){
+
+		// initial stuff to run on load
+		var dom_input = document.getElementById(osc_text);
+
+		var textBind = function(value){
+			console.log('firing the text bind');
+			var freq = value;
+			console.log(freq);
+			setOsc(freq, osc_name);
+		} // end textBind
+
+		// initial page load listener
+		$(document).bind('ready', function(){
+			$(dom_input).val('440'); // set to default frequency
+			textBind( $(dom_input).val() );
+		});
+		// litener for text changes
+		$(dom_input).bind('change paste keyup', function(){
+			textBind( $(this).val() );
+		});
+	}; // End initText
+
+
 
 
 
@@ -195,9 +263,8 @@ $(document).ready(function(){
 	initSliders();
 	generateOscAndPan();
 	initSliderListener();
-
-
 	initMuteButton();
+	initIntervalFractionSelect();
 
 
 
