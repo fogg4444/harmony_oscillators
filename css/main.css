@@ -75,17 +75,23 @@ h1{
 	position: relative;
 }
 
-#interval_selects{
+#interval_selects_div{
 	margin: 0 auto;
 	padding: 0;
+	position: absolute;
+	top: 50%;
 }
 
-#equal_temp_select{
+#interval_menu{
+	
+}
+
+/*#equal_temp_select{
 	position: absolute;
 	top: 50%;
 	right: 50%;
 	clear: both;
-}
+}*/
 
 .freq_input{
 	text-align: center;

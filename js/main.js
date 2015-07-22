@@ -1,4 +1,44 @@
+// TO DO
+// fix frequency to precision error ontext box edit
+
+
 Tone.Master.mute = true; // this needs to go first to avoid any clicking
+
+var intervals = {
+
+	'Just_Intonation' : {
+		'Unison' 		 : '1/1',
+		'Minor_Second'   : '16/15',
+		'Major_Second'   : '9/8',
+		'Minor_Third'    : '6/5',
+		'Major_Third'    : '5/4',
+		'Perfect_Fourth' : '4/3',
+		'Tritone'        : '7/5',
+		'Perfect_Fifth'  : '3/2',
+		'Minor Sixth'    : '8/5',
+		'Major_Sixth'    : '5/3',
+		'Minor_Seventh'  : '16/9',
+		'Major_Seventh'  : '15/8',
+		'Octave'         : '2/1',
+	},
+
+	'Other_Temp' : {
+		'Unison' 		 : '1/1',
+		'Minor_Second'   : '16/15',
+		'Major_Second'   : '9/8',
+		'Minor_Third'    : '6/5',
+		'Major_Third'    : '5/4',
+		'Perfect_Fourth' : '4/3',
+		'Tritone'        : '7/5',
+		'Perfect_Fifth'  : '3/2',
+		'Minor Sixth'    : '8/5',
+		'Major_Sixth'    : '5/3',
+		'Minor_Seventh'  : '16/9',
+		'Major_Seventh'  : '15/8',
+		'Octave'         : '2/1',
+	}
+}
+
 
 var equal_temp_interval_fraction_list = { // little library for keeping track of equal temperment ratios
 	'Unison' : '1/1',
@@ -64,11 +104,11 @@ var initMouseTouchUp = function(){
 }; // end initMouseTouchUp
 
 var generateOscAndPan = function(){
-	console.log('gen pan')
-	console.log(osc_generate_array)
+	// console.log('gen pan')
+	// console.log(osc_generate_array)
 
 	osc_generate_array.forEach(function(x){
-		console.log(x)
+		// console.log(x)
 		var this_panner = x + '_pan';
 
 		window[this_panner] = new Tone.Panner(.5).toMaster();
@@ -133,22 +173,11 @@ $(document).ready(function(){
 	console.log("document ready");
 
 	var initIntervalFractionSelect = function(){
-		var fraction_select_menu = $('#interval_fraction_select');
 
-		for( var x in equal_temp_interval_fraction_list){ // loop through equal_temp_interval_fraction_list and generate options in list
-			var interval_name = x;
-			var interval_name_no_underscore = interval_name.replace(/[_]/g, " ")
-			var fraction = equal_temp_interval_fraction_list[x];
+		var selectMenuChange = function(){
 
-			fraction_select_menu
-				.append( $("<option></option>")
-					.attr('value', interval_name)
-					.text(interval_name_no_underscore) );
-		}
-
-		fraction_select_menu.change(function(){ // on equal tempered menu change run this
 			var selection_key = $(this).val();
-			var selection_index = equal_temp_interval_fraction_list[selection_key];
+			var selection_index = intervals[this.id][selection_key];
 			var fraction_format = selection_index
 				.split('/')
 				.reverse()
@@ -167,8 +196,54 @@ $(document).ready(function(){
 			console.log(new_osc_2);
 			setOsc(new_osc_2, 'osc_2');
 			console.log('test ' + selection_index)
-			// setInputText();
-		});
+			setInputText();
+		}
+
+		for( var menu in intervals){
+			// Generate select menues for each
+
+			var interval_selects_div = $('#interval_selects_div');
+			interval_selects_div.append('<p>' + menu.replace(/[_]/g, ' ') + '</p>')
+			interval_selects_div.append('<select class="interval_menu" id=' + menu + ' name=' + menu + '></select>')
+			var this_menu = $('#' + menu);
+			for( var interval_name in intervals[menu]){
+				var interval_name_no_underscore = interval_name.replace(/[_]/g, " ")
+				this_menu
+					.append( $("<option></option>")
+						.attr('value', interval_name)
+						.text(interval_name_no_underscore) );
+			}
+
+		console.log(this_menu)
+		this_menu.change( selectMenuChange );
+
+		}
+
+		// $('#equal_temp').change(function(){ // on equal tempered menu change run this
+		// 	var selection_key = $(this).val();
+		// 	var selection_index = equal_temp_interval_fraction_list[selection_key];
+
+		// 	console.log(selection_key, selection_index);
+		// 	var fraction_format = selection_index
+		// 		.split('/')
+		// 		.reverse()
+		// 		.map(function(x){
+		// 			//console.log(x);
+		// 			return parseFloat(x);
+		// 		});
+		// 	fraction_format = fraction_format.map(function(x){ // formatting the fractions into useable arrays for multiplication
+		// 		return x / fraction_format[0];
+		// 	})
+		// 	var multiplier = fraction_format[1];
+		// 	console.log(multiplier)
+		// 	var first_osc_value = parseFloat(current_osc_values['osc_1']);
+
+		// 	var new_osc_2 = first_osc_value * multiplier;
+		// 	console.log(new_osc_2);
+		// 	setOsc(new_osc_2, 'osc_2');
+		// 	console.log('test ' + selection_index)
+		// 	setInputText();
+		// });
 	} // end initIntervalFractionSelect
 
 	var generateOscWorldHTML = function(){
@@ -196,9 +271,8 @@ $(document).ready(function(){
 		}; // end setOsc
 	};
 	var setMath = function(freq, osc_name){
-
 		var freq_length_test = freq.toString().length;
-		console.log(freq_length_test)
+		//console.log(freq_length_test)
 
 		if (freq_length_test > 5){
 			// console.log('greater than 5');
@@ -268,6 +342,8 @@ $(document).ready(function(){
 	initSliderListener();
 	initMuteButton();
 	initIntervalFractionSelect();
+
+
 
 	resizeWindow();
 	$(window).resize(function(){
