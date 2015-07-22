@@ -75,7 +75,12 @@ h1{
 	position: relative;
 }
 
-#interval_fraction_select{
+#interval_selects{
+	margin: 0 auto;
+	padding: 0;
+}
+
+#equal_temp_select{
 	position: absolute;
 	top: 50%;
 	right: 50%;

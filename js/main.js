@@ -14,12 +14,9 @@ var equal_temp_interval_fraction_list = { // little library for keeping track of
 	'Minor_Seventh'  : '16/9',
 	'Major_Seventh'  : '15/8',
 	'Octave'         : '2/1',
-
 }
 
 var current_osc_values = {} // global memory for osc values. enables referencing by other math
-
-
 
 var isNumeric = function(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
@@ -30,12 +27,13 @@ var resizeWindow = function(){ // keeping the css height at 100%
 	$("#wrap").css('height', window_height_px);
 } // end resize Window
 
+// var osc_count = 2;
 
-var osc_count = 2;
-var osc_list = [];
+var osc_generate_array = ['osc_1','osc_2'];
+
+// var osc_list = [];
 var slider_list = []; // stores a list of all sliders in the program. functions may loop through this list to act on all sliders.
 var osc_text_list = [];
-
 
 
 var initSliders = function(){
@@ -66,8 +64,11 @@ var initMouseTouchUp = function(){
 }; // end initMouseTouchUp
 
 var generateOscAndPan = function(){
+	console.log('gen pan')
+	console.log(osc_generate_array)
 
-	osc_list.forEach(function(x){
+	osc_generate_array.forEach(function(x){
+		console.log(x)
 		var this_panner = x + '_pan';
 
 		window[this_panner] = new Tone.Panner(.5).toMaster();
@@ -81,7 +82,6 @@ var initSliderListener = function(){  // this whole section needs a lot of help.
 	// console.log(slider_list)
 	console.log('==============================');
 
-
 	var counter = function(id, value){
 		// console.log('bang counter: ' + id + value)
 		var func = function(id, value){
@@ -90,12 +90,10 @@ var initSliderListener = function(){  // this whole section needs a lot of help.
 		return func
 	}
 
-
 	slider_list.forEach(function(input){ // run through all sliders in sliders list
 
 		var dom_input = document.getElementById(input);
 		var this_id = dom_input.id;
-
 
 		var closure_name = this_id + '_counter' // dynamically generate names for each version of closure
 		this[closure_name] = counter(closure_name); // creates closures based on name from above
@@ -119,7 +117,6 @@ var initMuteButton = function(){
 	}else{
 		$('#mute_button').css('background-color', 'red');
 	};
-
 	$('#mute_button').bind('mousedown touchstart', function(){ // click event handler
 		if (Tone.Master.mute === true){
 			Tone.Master.mute = false;
@@ -169,54 +166,54 @@ $(document).ready(function(){
 			var new_osc_2 = first_osc_value * multiplier;
 			console.log(new_osc_2);
 			setOsc(new_osc_2, 'osc_2');
+			console.log('test ' + selection_index)
+			// setInputText();
 		});
 	} // end initIntervalFractionSelect
 
 	var generateOscWorldHTML = function(){
-		for(var i = 1; i <= osc_count; i++){  // generate lists of data to be reerenced by other functions
-			var osc_name = 'osc_' + i;
-			osc_list.push(osc_name);
-
-			var slider_name = 'slider_' + i;
-			slider_list.push(slider_name);
-
+		osc_generate_array.forEach(function(x){
+			var osc_name = x;
+			var slider_name = osc_name + '_slider';
+				slider_list.push(slider_name);
 			var osc_text = osc_name + '_text';
-			osc_text_list.push(osc_text);
+				osc_text_list.push(osc_text);
 
-			// generate all the html inside osc world div here
 			$('#osc_world').append('<div id=' + osc_name + '><div class="freq_input"><input id=' + osc_text + ' type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
 			initText(osc_text, osc_name);
-		};
+		});
 	} // end GenerateOscWOrldHTML
-
-	var setText = function(freq, name){
-		console.log('set text firing')
-		console.log(freq, name)
-		var text_input = name + '_text';
-		console.log( text_input )
-	}
 
 	var setOsc = function(freq, name){ // this needs to be fixed
 		if ( $.isNumeric(freq) ){
-			console.log('set osc');
-			console.log(name);
-			console.log(freq);
+			// console.log('set osc');
+			// console.log(name);
+			// console.log(freq);
 			current_osc_values[name] = freq; // dump the value into the global variable
 			window[name].frequency.value = freq; // this needs help here...
 			setMath(freq, name);
-			setText(freq, name)
+			setInputText(freq, name)
 		}; // end setOsc
 	};
 	var setMath = function(freq, osc_name){
+
+		var freq_length_test = freq.toString().length;
+		console.log(freq_length_test)
+
+		if (freq_length_test > 5){
+			// console.log('greater than 5');
+			freq = freq.toPrecision(6) + '...';
+			// console.log(freq);
+		};
+
 		if (osc_name === undefined){
 			// reset all to 440
 			$('#osc_1_math').html(440);
 			$('#osc_2_math').html(440);
 		}else{
 			// reset selected
-			console.log(osc_name, freq)
+			// console.log(osc_name, freq)
 			var this_osc_math_id = '#' + osc_name + '_math';
-
 			if (freq === ''){
 				$(this_osc_math_id).html('__?__')
 			}else{
@@ -230,16 +227,27 @@ $(document).ready(function(){
 		$('#result').html(result)
 	};// end setMath
 
-	var initText = function(osc_text, osc_name){
+	var setInputText = function(freq, osc_name){
+		// console.log('set text')
+		var this_osc_text = '#' + osc_name + '_text';
+		var this_input = $(this_osc_text);
+		// console.log( this_input.val() );
 
+		this_input.val(freq);
+		// console.log( this_input.val() );
+		// console.log(freq, osc_name, this_input);
+	}
+
+	var initText = function(osc_text, osc_name){
 		// initial stuff to run on load
 		var dom_input = document.getElementById(osc_text);
 
 		var textBind = function(value){
-			console.log('firing the text bind');
+			// console.log('firing the text bind');
 			var freq = value;
-			console.log(freq);
+			// console.log(freq);
 			setOsc(freq, osc_name);
+			setInputText(freq, osc_name);
 		} // end textBind
 
 		// initial page load listener
@@ -253,11 +261,6 @@ $(document).ready(function(){
 		});
 	}; // End initText
 
-
-
-
-
-
 	generateOscWorldHTML();
 	initMouseTouchUp();
 	initSliders();
@@ -265,16 +268,6 @@ $(document).ready(function(){
 	initSliderListener();
 	initMuteButton();
 	initIntervalFractionSelect();
-
-
-
-
-	// console.log(osc_1.frequency.value);
-	// console.log(osc_2);
-	// osc_1.frequency.value = 500;
-
-
-
 
 	resizeWindow();
 	$(window).resize(function(){
