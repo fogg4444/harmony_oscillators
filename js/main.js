@@ -7,7 +7,9 @@ $(document).ready(function(){
 
 	Tone.Master.mute = true; // this needs to go first to avoid any clicking
 
-	var intervals = {
+HarmonyOscillatorsGlobalNamespace = {
+
+	intervals : {
 
 		'Just_Intonation' : {
 			'Unison' 		 : '1/1',
@@ -40,10 +42,10 @@ $(document).ready(function(){
 			'Major_Seventh'  : '15/8',
 			'Octave'         : '2/1',
 		}
-	}
+	},
 
 
-	// var equal_temp_interval_fraction_list = { // little library for keeping track of equal temperment ratios
+	// equal_temp_interval_fraction_list : { // little library for keeping track of equal temperment ratios
 	// 	'Unison' : '1/1',
 	// 	'Minor_Second'   : '16/15',
 	// 	'Major_Second'   : '9/8',
@@ -57,29 +59,29 @@ $(document).ready(function(){
 	// 	'Minor_Seventh'  : '16/9',
 	// 	'Major_Seventh'  : '15/8',
 	// 	'Octave'         : '2/1',
-	// }
+	// },
 
-	var current_osc_values = {}; // global memory for osc values. enables referencing by other math
-	var current_slider_value = {};
-	var isNumeric = function(n) {
+	current_osc_values : {}, // global memory for osc values. enables referencing by other math
+	current_slider_value : {},
+	isNumeric : function(n) {
 	  return !isNaN(parseFloat(n)) && isFinite(n);
-	}; // end isNumeric
+	}, // end isNumeric
 
-	var resizeWindow = function(){ // keeping the css height at 100%
+	resizeWindow : function(){ // keeping the css height at 100%
 		var window_height_px = $(window).outerHeight(true)  + "px";
 		$("#wrap").css('height', window_height_px);
-	} // end resize Window
+	}, // end resize Window
 
-	// var osc_count = 2;
+	// osc_count : 2,
 
-	var osc_generate_array = ['osc_1','osc_2'];
+	osc_generate_array : ['osc_1','osc_2'],
 
-	// var osc_list = [];
-	var slider_list = []; // stores a list of all sliders in the program. functions may loop through this list to act on all sliders.
-	var osc_text_list = [];
+	// osc_list : [],
+	slider_list : [], // stores a list of all sliders in the program. functions may loop through this list to act on all sliders.
+	osc_text_list : [],
 
 
-	var initSliders = function(){
+	initSliders : function(){
 		slider_list.forEach(function(input){
 			var dom_input = document.getElementById(input) // temporary variable to feed into noUiSlider.create()	
 			noUiSlider.create(dom_input, { // generates the slider
@@ -90,23 +92,23 @@ $(document).ready(function(){
 				}
 			});
 		});
-	}; // end initSliders
+	}, // end initSliders
 
-	var resetSlider = function(){
+	resetSlider : function(){
 		// console.log('reset slider');
 		slider_list.forEach(function(input){
 			var dom_input = document.getElementById(input)
 			dom_input.noUiSlider.set(50);
 		});
-	}; // end resetSlider
+	}, // end resetSlider
 
-	var initMouseTouchUp = function(){
+	initMouseTouchUp : function(){
 		$(window).bind('mouseup touchend', function(){ // bind any completion of input to slider reset function
 			resetSlider();
 		});
-	}; // end initMouseTouchUp
+	}, // end initMouseTouchUp
 
-	var generateOscAndPan = function(){
+	generateOscAndPan : function(){
 		// console.log('gen pan')
 		// console.log(osc_generate_array)
 
@@ -119,9 +121,9 @@ $(document).ready(function(){
 			window[x] = new Tone.Oscillator(440, 'sine').connect(window[this_panner]).start();
 			// console.log( window[x] );
 		});
-	}; // end generateOscAndPan
+	}, // end generateOscAndPan
 
-	var initSliderListener = function(){  // this whole section needs a lot of help... closures and things on the set interval
+	initSliderListener : function(){  // this whole section needs a lot of help... closures and things on the set interval
 		// console.log(slider_list)
 		console.log('==============================');
 
@@ -193,10 +195,10 @@ $(document).ready(function(){
 
 			});
 		});
-	}; // end initSliderListner
+	}, // end initSliderListner
 
 
-	var initMuteButton = function(){
+	initMuteButton : function(){
 		if (Tone.Master.mute === false){ // initial coloring
 			$('#mute_button').css('background-color', 'green');
 		}else{
@@ -211,9 +213,9 @@ $(document).ready(function(){
 				$(this).css('background-color', 'red');
 			};
 		})
-	}; // end initMuteButton
+	}, // end initMuteButton
 
-	var initIntervalFractionSelect = function(){
+	initIntervalFractionSelect : function(){
 
 		var selectMenuChange = function(){
 
@@ -285,9 +287,9 @@ $(document).ready(function(){
 		// 	console.log('test ' + selection_index)
 		// 	setInputText();
 		// });
-	} // end initIntervalFractionSelect
+	}, // end initIntervalFractionSelect
 
-	var generateOscWorldHTML = function(){
+	generateOscWorldHTML : function(){
 		osc_generate_array.forEach(function(x){
 			var osc_name = x;
 			var slider_name = osc_name + '_slider';
@@ -298,9 +300,9 @@ $(document).ready(function(){
 			$('#osc_world').append('<div id=' + osc_name + '><div class="freq_input"><input id=' + osc_text + ' type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
 			initText(osc_text, osc_name);
 		});
-	} // end GenerateOscWOrldHTML
+	}, // end GenerateOscWOrldHTML
 
-	var setOsc = function(freq, name){ // this needs to be fixed
+	setOsc : function(freq, name){ // this needs to be fixed
 		if ( $.isNumeric(freq) ){
 			// console.log('set osc');
 			// console.log(name);
@@ -311,12 +313,12 @@ $(document).ready(function(){
 			setMath(freq, name);
 			setInputText(freq, name)
 		}; // end setOsc
-	};
+	},
 
-	// var getOscValue = function(name){
+	// getOscValue : function(name){
 	// 	return name.frequency.value;
-	// }
-	var setMath = function(freq, osc_name){
+	// },
+	setMath : function(freq, osc_name){
 		var freq_length_test = freq.toString().length;
 		//console.log(freq_length_test)
 
@@ -345,9 +347,9 @@ $(document).ready(function(){
 
 		var result = Math.abs( osc_1_input - osc_2_input ) ;
 		$('#result').html(result)
-	};// end setMath
+	},// end setMath
 
-	var setInputText = function(freq, osc_name){
+	setInputText : function(freq, osc_name){
 		// console.log('set text')
 		var this_osc_text = '#' + osc_name + '_text';
 		var this_input = $(this_osc_text);
@@ -356,9 +358,9 @@ $(document).ready(function(){
 		this_input.val(freq);
 		// console.log( this_input.val() );
 		// console.log(freq, osc_name, this_input);
-	}
+	},
 
-	var initText = function(osc_text, osc_name){
+	initText : function(osc_text, osc_name){
 		// initial stuff to run on load
 		var dom_input = document.getElementById(osc_text);
 
@@ -379,7 +381,8 @@ $(document).ready(function(){
 		$(dom_input).bind('change paste keyup', function(){
 			textBind( $(this).val() );
 		});
-	}; // End initText
+	} // End initText
+}
 
 	generateOscWorldHTML();
 	initMouseTouchUp();
