@@ -73,7 +73,7 @@ harmonyOscillatorsGlobalNamespace = {
 
 
 	initSliders : function(){
-		harmonyOscillatorsGlobalNamespace.slider_list.forEach(function(input){
+		this.slider_list.forEach(function(input){
 			var dom_input = document.getElementById(input) // temporary variable to feed into noUiSlider.create()	
 			noUiSlider.create(dom_input, { // generates the slider
 				start: [50],
@@ -87,7 +87,7 @@ harmonyOscillatorsGlobalNamespace = {
 
 	resetSlider : function(){
 		// console.log('reset slider');
-		harmonyOscillatorsGlobalNamespace.slider_list.forEach(function(input){
+		this.slider_list.forEach(function(input){
 			var dom_input = document.getElementById(input)
 			dom_input.noUiSlider.set(50);
 		});
@@ -101,9 +101,9 @@ harmonyOscillatorsGlobalNamespace = {
 
 	generateOscAndPan : function(){
 		// console.log('gen pan')
-		// console.log(harmonyOscillatorsGlobalNamespace.osc_generate_array)
+		// console.log(this.osc_generate_array)
 
-		harmonyOscillatorsGlobalNamespace.osc_generate_array.forEach(function(x){
+		this.osc_generate_array.forEach(function(x){
 			// console.log(x)
 			var this_panner = x + '_pan';
 
@@ -115,7 +115,7 @@ harmonyOscillatorsGlobalNamespace = {
 	}, // end generateOscAndPan
 
 	initSliderListener : function(){  // this whole section needs a lot of help... closures and things on the set interval
-		// console.log(harmonyOscillatorsGlobalNamespace.slider_list)
+		// console.log(this.slider_list)
 		console.log('==============================');
 
 		var counter = function(id, value){
@@ -126,7 +126,7 @@ harmonyOscillatorsGlobalNamespace = {
 			return func
 		}
 
-		harmonyOscillatorsGlobalNamespace.slider_list.forEach(function(input){ // run through all sliders in sliders list
+		this.slider_list.forEach(function(input){ // run through all sliders in sliders list
 
 			var dom_input = document.getElementById(input);
 			var this_id = dom_input.id;
@@ -233,14 +233,14 @@ harmonyOscillatorsGlobalNamespace = {
 			harmonyOscillatorsGlobalNamespace.setInputText();
 		}
 
-		for( var menu in harmonyOscillatorsGlobalNamespace.intervals){
+		for( var menu in this.intervals){
 			// Generate select menues for each
 
 			var interval_selects_div = $('#interval_selects_div');
 			interval_selects_div.append('<p>' + menu.replace(/[_]/g, ' ') + '</p>')
 			interval_selects_div.append('<select class="interval_menu" id=' + menu + ' name=' + menu + '></select>')
 			var this_menu = $('#' + menu);
-			for( var interval_name in harmonyOscillatorsGlobalNamespace.intervals[menu]){
+			for( var interval_name in this.intervals[menu]){
 				var interval_name_no_underscore = interval_name.replace(/[_]/g, " ")
 				this_menu
 					.append( $("<option></option>")
@@ -281,7 +281,7 @@ harmonyOscillatorsGlobalNamespace = {
 	}, // end initIntervalFractionSelect
 
 	generateOscWorldHTML : function(){
-		harmonyOscillatorsGlobalNamespace.osc_generate_array.forEach(function(x){
+		this.osc_generate_array.forEach(function(x){
 			var osc_name = x;
 			var slider_name = osc_name + '_slider';
 				harmonyOscillatorsGlobalNamespace.slider_list.push(slider_name);
@@ -298,11 +298,11 @@ harmonyOscillatorsGlobalNamespace = {
 			// console.log('set osc');
 			// console.log(name);
 			// console.log(freq);
-			harmonyOscillatorsGlobalNamespace.current_osc_values[name] = freq; // dump the value into the global variable
+			this.current_osc_values[name] = freq; // dump the value into the global variable
 
 			window[name].frequency.value = freq; // this needs help here...
-			harmonyOscillatorsGlobalNamespace.setMath(freq, name);
-			harmonyOscillatorsGlobalNamespace.setInputText(freq, name)
+			this.setMath(freq, name);
+			this.setInputText(freq, name)
 		};
 	}, // end setOsc
 
