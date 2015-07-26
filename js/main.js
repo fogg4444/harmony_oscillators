@@ -137,13 +137,14 @@ harmonyOscillatorsGlobalNamespace = {
 			var updateFrequencyInterval = null;
 			
 			dom_input.noUiSlider.on('update',function(values, handle){
+				var hogn = harmonyOscillatorsGlobalNamespace; // short namespace alias
 				var value = values[handle];
 				var id = this_id;
 				// console.log(id)
 				var formatted_value = (value / 50) - 1; // normalize values into a +/-1 float value
 
-				harmonyOscillatorsGlobalNamespace.current_slider_value[id] = formatted_value;
-				// console.log(harmonyOscillatorsGlobalNamespace.current_slider_value[id]);
+				hogn.current_slider_value[id] = formatted_value;
+				// console.log(hogn.current_slider_value[id]);
 				console.log(id, formatted_value)
 
 				var updateSpeed = 33.3;
@@ -157,19 +158,19 @@ harmonyOscillatorsGlobalNamespace = {
 					var freqUpdateScalingFactor = 1200 / (1000 / updateSpeed); // 1000 = number of milliseconds in a second
 																			   // 1200 = cents in an octave
 
-					var frequencyUpdateAmountInCents =	harmonyOscillatorsGlobalNamespace.current_slider_value[id] * freqUpdateScalingFactor;
+					var frequencyUpdateAmountInCents =	hogn.current_slider_value[id] * freqUpdateScalingFactor;
 
-					console.log('current slider value [id]', harmonyOscillatorsGlobalNamespace.current_slider_value[id])
+					console.log('current slider value [id]', hogn.current_slider_value[id])
 
 					console.log('frequency update amount in cents', frequencyUpdateAmountInCents);
-					// console.log( harmonyOscillatorsGlobalNamespace.current_slider_value[id] )
+					// console.log( hogn.current_slider_value[id] )
 
 					var updatedFrequency = current_frequency * Math.pow(2.0, frequencyUpdateAmountInCents / 1200.0 );
 					
 					// console.log('math', Math.pow(2.0, frequencyUpdateAmountInCents / 1200.0 ) );
 					console.log('updated freq',updatedFrequency)
 
-					harmonyOscillatorsGlobalNamespace.setOsc(updatedFrequency , osc_id);
+					hogn.setOsc(updatedFrequency , osc_id);
 
 				}
 
@@ -209,9 +210,9 @@ harmonyOscillatorsGlobalNamespace = {
 	initIntervalFractionSelect : function(){
 
 		var selectMenuChange = function(){
-
+			var hogn = harmonyOscillatorsGlobalNamespace; // short namespace alias
 			var selection_key = $(this).val();
-			var selection_index = harmonyOscillatorsGlobalNamespace.intervals[this.id][selection_key];
+			var selection_index = hogn.intervals[this.id][selection_key];
 			var fraction_format = selection_index
 				.split('/')
 				.reverse()
@@ -224,13 +225,13 @@ harmonyOscillatorsGlobalNamespace = {
 			})
 			var multiplier = fraction_format[1];
 			console.log(multiplier)
-			var first_osc_value = parseFloat(harmonyOscillatorsGlobalNamespace.current_osc_values['osc_1']);
+			var first_osc_value = parseFloat(hogn.current_osc_values['osc_1']);
 
 			var new_osc_2 = first_osc_value * multiplier;
 			console.log(new_osc_2);
-			harmonyOscillatorsGlobalNamespace.setOsc(new_osc_2, 'osc_2');
+			hogn.setOsc(new_osc_2, 'osc_2');
 			console.log('test ' + selection_index)
-			harmonyOscillatorsGlobalNamespace.setInputText();
+			hogn.setInputText();
 		}
 
 		for( var menu in this.intervals){
@@ -254,8 +255,9 @@ harmonyOscillatorsGlobalNamespace = {
 		}
 
 		// $('#equal_temp').change(function(){ // on equal tempered menu change run this
+		//	var hogn = harmonyOscillatorsGlobalNamespace; // short namespace alias
 		// 	var selection_key = $(this).val();
-		// 	var selection_index = harmonyOscillatorsGlobalNamespace.equal_temp_interval_fraction_list[selection_key];
+		// 	var selection_index = hogn.equal_temp_interval_fraction_list[selection_key];
 
 		// 	console.log(selection_key, selection_index);
 		// 	var fraction_format = selection_index
@@ -270,26 +272,27 @@ harmonyOscillatorsGlobalNamespace = {
 		// 	})
 		// 	var multiplier = fraction_format[1];
 		// 	console.log(multiplier)
-		// 	var first_osc_value = parseFloat(harmonyOscillatorsGlobalNamespace.current_osc_values['osc_1']);
+		// 	var first_osc_value = parseFloat(hogn.current_osc_values['osc_1']);
 
 		// 	var new_osc_2 = first_osc_value * multiplier;
 		// 	console.log(new_osc_2);
-		// 	harmonyOscillatorsGlobalNamespace.setOsc(new_osc_2, 'osc_2');
+		// 	hogn.setOsc(new_osc_2, 'osc_2');
 		// 	console.log('test ' + selection_index)
-		// 	harmonyOscillatorsGlobalNamespace.setInputText();
+		// 	hogn.setInputText();
 		// });
 	}, // end initIntervalFractionSelect
 
 	generateOscWorldHTML : function(){
 		this.osc_generate_array.forEach(function(x){
+			var hogn = harmonyOscillatorsGlobalNamespace; // short namespace alias
 			var osc_name = x;
 			var slider_name = osc_name + '_slider';
-				harmonyOscillatorsGlobalNamespace.slider_list.push(slider_name);
+				hogn.slider_list.push(slider_name);
 			var osc_text = osc_name + '_text';
-				harmonyOscillatorsGlobalNamespace.osc_text_list.push(osc_text);
+				hogn.osc_text_list.push(osc_text);
 
 			$('#osc_world').append('<div id=' + osc_name + '><div class="freq_input"><input id=' + osc_text + ' type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
-			harmonyOscillatorsGlobalNamespace.initText(osc_text, osc_name);
+			hogn.initText(osc_text, osc_name);
 		});
 	}, // end generateOscWorldHTML
 
@@ -359,8 +362,9 @@ harmonyOscillatorsGlobalNamespace = {
 			// console.log('firing the text bind');
 			var freq = value;
 			// console.log(freq);
-			harmonyOscillatorsGlobalNamespace.setOsc(freq, osc_name);
-			harmonyOscillatorsGlobalNamespace.setInputText(freq, osc_name);
+			var hogn = harmonyOscillatorsGlobalNamespace; // short namespace alias
+			hogn.setOsc(freq, osc_name);
+			hogn.setInputText(freq, osc_name);
 		} // end textBind
 
 		// initial page load listener
@@ -380,17 +384,17 @@ $(document).ready(function(){
 	// TO DO
 	// fix frequency to precision error ontext box edit
 
-
+	var hogn = harmonyOscillatorsGlobalNamespace; // short namespace alias
 
 	Tone.Master.mute = true; // this needs to go first to avoid any clicking
 
-	harmonyOscillatorsGlobalNamespace.generateOscWorldHTML();
-	harmonyOscillatorsGlobalNamespace.initMouseTouchUp();
-	harmonyOscillatorsGlobalNamespace.initSliders();
-	harmonyOscillatorsGlobalNamespace.generateOscAndPan();
-	harmonyOscillatorsGlobalNamespace.initSliderListener();
-	harmonyOscillatorsGlobalNamespace.initMuteButton();
-	harmonyOscillatorsGlobalNamespace.initIntervalFractionSelect();
+	hogn.generateOscWorldHTML();
+	hogn.initMouseTouchUp();
+	hogn.initSliders();
+	hogn.generateOscAndPan();
+	hogn.initSliderListener();
+	hogn.initMuteButton();
+	hogn.initIntervalFractionSelect();
 
 
 	// osc_1.frequency.value = 500;
@@ -404,9 +408,9 @@ $(document).ready(function(){
 
 
 
-	harmonyOscillatorsGlobalNamespace.resizeWindow();
+	hogn.resizeWindow();
 	$(window).resize(function(){
-		harmonyOscillatorsGlobalNamespace.resizeWindow();
+		hogn.resizeWindow();
 	});
 })
 
