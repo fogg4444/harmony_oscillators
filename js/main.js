@@ -1,12 +1,3 @@
-$(document).ready(function(){
-	console.log("document ready");
-	// TO DO
-	// fix frequency to precision error ontext box edit
-
-
-
-	Tone.Master.mute = true; // this needs to go first to avoid any clicking
-
 harmonyOscillatorsGlobalNamespace = {
 
 	intervals : {
@@ -383,6 +374,15 @@ harmonyOscillatorsGlobalNamespace = {
 		});
 	} // End initText
 }
+
+$(document).ready(function(){
+	console.log("document ready");
+	// TO DO
+	// fix frequency to precision error ontext box edit
+
+
+
+	Tone.Master.mute = true; // this needs to go first to avoid any clicking
 
 	generateOscWorldHTML();
 	initMouseTouchUp();
