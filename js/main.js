@@ -1,176 +1,217 @@
-// TO DO
-// fix frequency to precision error ontext box edit
-
-
-Tone.Master.mute = true; // this needs to go first to avoid any clicking
-
-var intervals = {
-
-	'Just_Intonation' : {
-		'Unison' 		 : '1/1',
-		'Minor_Second'   : '16/15',
-		'Major_Second'   : '9/8',
-		'Minor_Third'    : '6/5',
-		'Major_Third'    : '5/4',
-		'Perfect_Fourth' : '4/3',
-		'Tritone'        : '7/5',
-		'Perfect_Fifth'  : '3/2',
-		'Minor Sixth'    : '8/5',
-		'Major_Sixth'    : '5/3',
-		'Minor_Seventh'  : '16/9',
-		'Major_Seventh'  : '15/8',
-		'Octave'         : '2/1',
-	},
-
-	'Other_Temp' : {
-		'Unison' 		 : '1/1',
-		'Minor_Second'   : '16/15',
-		'Major_Second'   : '9/8',
-		'Minor_Third'    : '6/5',
-		'Major_Third'    : '5/4',
-		'Perfect_Fourth' : '4/3',
-		'Tritone'        : '7/5',
-		'Perfect_Fifth'  : '3/2',
-		'Minor Sixth'    : '8/5',
-		'Major_Sixth'    : '5/3',
-		'Minor_Seventh'  : '16/9',
-		'Major_Seventh'  : '15/8',
-		'Octave'         : '2/1',
-	}
-}
-
-
-var equal_temp_interval_fraction_list = { // little library for keeping track of equal temperment ratios
-	'Unison' : '1/1',
-	'Minor_Second'   : '16/15',
-	'Major_Second'   : '9/8',
-	'Minor_Third'    : '6/5',
-	'Major_Third'    : '5/4',
-	'Perfect_Fourth' : '4/3',
-	'Tritone'        : '7/5',
-	'Perfect_Fifth'  : '3/2',
-	'Minor Sixth'    : '8/5',
-	'Major_Sixth'    : '5/3',
-	'Minor_Seventh'  : '16/9',
-	'Major_Seventh'  : '15/8',
-	'Octave'         : '2/1',
-}
-
-var current_osc_values = {} // global memory for osc values. enables referencing by other math
-
-var isNumeric = function(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
-} // end isNumeric
-
-var resizeWindow = function(){ // keeping the css height at 100%
-	var window_height_px = $(window).outerHeight(true)  + "px";
-	$("#wrap").css('height', window_height_px);
-} // end resize Window
-
-// var osc_count = 2;
-
-var osc_generate_array = ['osc_1','osc_2'];
-
-// var osc_list = [];
-var slider_list = []; // stores a list of all sliders in the program. functions may loop through this list to act on all sliders.
-var osc_text_list = [];
-
-
-var initSliders = function(){
-	slider_list.forEach(function(input){
-		var dom_input = document.getElementById(input) // temporary variable to feed into noUiSlider.create()	
-		noUiSlider.create(dom_input, { // generates the slider
-			start: [50],
-			range: {
-				'min': 0,
-				'max': 100
-			}
-		});
-	});
-}; // end initSliders
-
-var resetSlider = function(){
-	// console.log('reset slider');
-	slider_list.forEach(function(input){
-		var dom_input = document.getElementById(input)
-		dom_input.noUiSlider.set(50);
-	});
-}; // end resetSlider
-
-var initMouseTouchUp = function(){
-	$(window).bind('mouseup touchend', function(){ // bind any completion of input to slider reset function
-		resetSlider();
-	});
-}; // end initMouseTouchUp
-
-var generateOscAndPan = function(){
-	// console.log('gen pan')
-	// console.log(osc_generate_array)
-
-	osc_generate_array.forEach(function(x){
-		// console.log(x)
-		var this_panner = x + '_pan';
-
-		window[this_panner] = new Tone.Panner(.5).toMaster();
-		// console.log(x);
-		window[x] = new Tone.Oscillator(440, 'sine').connect(window[this_panner]).start();
-		// console.log( window[x] );
-	});
-}; // end generateOscAndPan
-
-var initSliderListener = function(){  // this whole section needs a lot of help... closures and things on the set interval
-	// console.log(slider_list)
-	console.log('==============================');
-
-	var counter = function(id, value){
-		// console.log('bang counter: ' + id + value)
-		var func = function(id, value){
-			// console.log(' inside func  -- ' + id +' --- ' + value )
-		}
-		return func
-	}
-
-	slider_list.forEach(function(input){ // run through all sliders in sliders list
-
-		var dom_input = document.getElementById(input);
-		var this_id = dom_input.id;
-
-		var closure_name = this_id + '_counter' // dynamically generate names for each version of closure
-		this[closure_name] = counter(closure_name); // creates closures based on name from above
-
-		dom_input.noUiSlider.on('update',function(values, handle){
-			var value = values[handle];
-			var id = this_id;
-			var formatted_value = (value / 50) - 1; // normalize values into a +/-1 float value
-			// console.log(value, id)
-			// counter(id, value); // send all the nicely formatted data off the the counter function
-			this[closure_name](id, formatted_value)
-
-		});
-	});
-}; // end initSliderListner
-
-
-var initMuteButton = function(){
-	if (Tone.Master.mute === false){ // initial coloring
-		$('#mute_button').css('background-color', 'green');
-	}else{
-		$('#mute_button').css('background-color', 'red');
-	};
-	$('#mute_button').bind('mousedown touchstart', function(){ // click event handler
-		if (Tone.Master.mute === true){
-			Tone.Master.mute = false;
-			$(this).css('background-color', 'green')
-		}else{
-			Tone.Master.mute = true;
-			$(this).css('background-color', 'red');
-		};
-	})
-}; // end initMuteButton
-
-
 $(document).ready(function(){
 	console.log("document ready");
+	// TO DO
+	// fix frequency to precision error ontext box edit
+
+
+
+	Tone.Master.mute = true; // this needs to go first to avoid any clicking
+
+	var intervals = {
+
+		'Just_Intonation' : {
+			'Unison' 		 : '1/1',
+			'Minor_Second'   : '16/15',
+			'Major_Second'   : '9/8',
+			'Minor_Third'    : '6/5',
+			'Major_Third'    : '5/4',
+			'Perfect_Fourth' : '4/3',
+			'Tritone'        : '7/5',
+			'Perfect_Fifth'  : '3/2',
+			'Minor Sixth'    : '8/5',
+			'Major_Sixth'    : '5/3',
+			'Minor_Seventh'  : '16/9',
+			'Major_Seventh'  : '15/8',
+			'Octave'         : '2/1',
+		},
+
+		'Other_Temp' : {
+			'Unison' 		 : '1/1',
+			'Minor_Second'   : '16/15',
+			'Major_Second'   : '9/8',
+			'Minor_Third'    : '6/5',
+			'Major_Third'    : '5/4',
+			'Perfect_Fourth' : '4/3',
+			'Tritone'        : '7/5',
+			'Perfect_Fifth'  : '3/2',
+			'Minor Sixth'    : '8/5',
+			'Major_Sixth'    : '5/3',
+			'Minor_Seventh'  : '16/9',
+			'Major_Seventh'  : '15/8',
+			'Octave'         : '2/1',
+		}
+	}
+
+
+	// var equal_temp_interval_fraction_list = { // little library for keeping track of equal temperment ratios
+	// 	'Unison' : '1/1',
+	// 	'Minor_Second'   : '16/15',
+	// 	'Major_Second'   : '9/8',
+	// 	'Minor_Third'    : '6/5',
+	// 	'Major_Third'    : '5/4',
+	// 	'Perfect_Fourth' : '4/3',
+	// 	'Tritone'        : '7/5',
+	// 	'Perfect_Fifth'  : '3/2',
+	// 	'Minor Sixth'    : '8/5',
+	// 	'Major_Sixth'    : '5/3',
+	// 	'Minor_Seventh'  : '16/9',
+	// 	'Major_Seventh'  : '15/8',
+	// 	'Octave'         : '2/1',
+	// }
+
+	var current_osc_values = {}; // global memory for osc values. enables referencing by other math
+	var current_slider_value = {};
+	var isNumeric = function(n) {
+	  return !isNaN(parseFloat(n)) && isFinite(n);
+	}; // end isNumeric
+
+	var resizeWindow = function(){ // keeping the css height at 100%
+		var window_height_px = $(window).outerHeight(true)  + "px";
+		$("#wrap").css('height', window_height_px);
+	} // end resize Window
+
+	// var osc_count = 2;
+
+	var osc_generate_array = ['osc_1','osc_2'];
+
+	// var osc_list = [];
+	var slider_list = []; // stores a list of all sliders in the program. functions may loop through this list to act on all sliders.
+	var osc_text_list = [];
+
+
+	var initSliders = function(){
+		slider_list.forEach(function(input){
+			var dom_input = document.getElementById(input) // temporary variable to feed into noUiSlider.create()	
+			noUiSlider.create(dom_input, { // generates the slider
+				start: [50],
+				range: {
+					'min': 0,
+					'max': 100
+				}
+			});
+		});
+	}; // end initSliders
+
+	var resetSlider = function(){
+		// console.log('reset slider');
+		slider_list.forEach(function(input){
+			var dom_input = document.getElementById(input)
+			dom_input.noUiSlider.set(50);
+		});
+	}; // end resetSlider
+
+	var initMouseTouchUp = function(){
+		$(window).bind('mouseup touchend', function(){ // bind any completion of input to slider reset function
+			resetSlider();
+		});
+	}; // end initMouseTouchUp
+
+	var generateOscAndPan = function(){
+		// console.log('gen pan')
+		// console.log(osc_generate_array)
+
+		osc_generate_array.forEach(function(x){
+			// console.log(x)
+			var this_panner = x + '_pan';
+
+			window[this_panner] = new Tone.Panner(.5).toMaster();
+			// console.log(x);
+			window[x] = new Tone.Oscillator(440, 'sine').connect(window[this_panner]).start();
+			// console.log( window[x] );
+		});
+	}; // end generateOscAndPan
+
+	var initSliderListener = function(){  // this whole section needs a lot of help... closures and things on the set interval
+		// console.log(slider_list)
+		console.log('==============================');
+
+		var counter = function(id, value){
+			// console.log('bang counter: ' + id + value)
+			var func = function(id, value){
+				// console.log(' inside func  -- ' + id +' --- ' + value )
+			}
+			return func
+		}
+
+		slider_list.forEach(function(input){ // run through all sliders in sliders list
+
+			var dom_input = document.getElementById(input);
+			var this_id = dom_input.id;
+
+			var closure_name = this_id + '_counter' // dynamically generate names for each version of closure
+			this[closure_name] = counter(closure_name); // creates closures based on name from above
+
+			var updateFrequencyInterval = null;
+			
+			dom_input.noUiSlider.on('update',function(values, handle){
+				var value = values[handle];
+				var id = this_id;
+				// console.log(id)
+				var formatted_value = (value / 50) - 1; // normalize values into a +/-1 float value
+
+				current_slider_value[id] = formatted_value;
+				// console.log(current_slider_value[id]);
+				console.log(id, formatted_value)
+
+				var updateSpeed = 33.3;
+
+				var updateFrequency = function(){
+					// console.log('updating frequency')
+					var osc_id = this_id.slice(0,-7) // removing '_slider' from slider name 'this_id'
+					var osc = window[osc_id];
+					var current_frequency = osc.frequency.value;
+					
+					var freqUpdateScalingFactor = 1200 / (1000 / updateSpeed); // 1000 = number of milliseconds in a second
+																			   // 1200 = cents in an octave
+
+					var frequencyUpdateAmountInCents =	current_slider_value[id] * freqUpdateScalingFactor;
+
+					console.log('current slider value [id]', current_slider_value[id])
+
+					console.log('frequency update amount in cents', frequencyUpdateAmountInCents);
+					// console.log( current_slider_value[id] )
+
+					var updatedFrequency = current_frequency * Math.pow(2.0, frequencyUpdateAmountInCents / 1200.0 );
+					
+					// console.log('math', Math.pow(2.0, frequencyUpdateAmountInCents / 1200.0 ) );
+					console.log('updated freq',updatedFrequency)
+
+					setOsc(updatedFrequency , osc_id);
+
+				}
+
+				if (formatted_value > 0 || formatted_value < 0){
+					if (updateFrequencyInterval === null){
+						updateFrequency();
+						updateFrequencyInterval = setInterval( updateFrequency, updateSpeed);
+					};
+				}else{
+					clearInterval(updateFrequencyInterval);
+					updateFrequencyInterval = null;
+				};
+
+
+			});
+		});
+	}; // end initSliderListner
+
+
+	var initMuteButton = function(){
+		if (Tone.Master.mute === false){ // initial coloring
+			$('#mute_button').css('background-color', 'green');
+		}else{
+			$('#mute_button').css('background-color', 'red');
+		};
+		$('#mute_button').bind('mousedown touchstart', function(){ // click event handler
+			if (Tone.Master.mute === true){
+				Tone.Master.mute = false;
+				$(this).css('background-color', 'green')
+			}else{
+				Tone.Master.mute = true;
+				$(this).css('background-color', 'red');
+			};
+		})
+	}; // end initMuteButton
 
 	var initIntervalFractionSelect = function(){
 
@@ -214,7 +255,7 @@ $(document).ready(function(){
 						.text(interval_name_no_underscore) );
 			}
 
-		console.log(this_menu)
+		// console.log(this_menu)
 		this_menu.change( selectMenuChange );
 
 		}
@@ -265,11 +306,16 @@ $(document).ready(function(){
 			// console.log(name);
 			// console.log(freq);
 			current_osc_values[name] = freq; // dump the value into the global variable
+
 			window[name].frequency.value = freq; // this needs help here...
 			setMath(freq, name);
 			setInputText(freq, name)
 		}; // end setOsc
 	};
+
+	// var getOscValue = function(name){
+	// 	return name.frequency.value;
+	// }
 	var setMath = function(freq, osc_name){
 		var freq_length_test = freq.toString().length;
 		//console.log(freq_length_test)
@@ -342,6 +388,16 @@ $(document).ready(function(){
 	initSliderListener();
 	initMuteButton();
 	initIntervalFractionSelect();
+
+
+	// osc_1.frequency.value = 500;
+	// console.log(osc_1.frequency.value);
+
+
+
+
+
+	
 
 
 

@@ -1,52 +1,21 @@
 
 
-// associating slider names with oscillator names
-var map = {
-	'slider_1': 'osc_1',
-	'slider_2': 'osc_2'
-}
+if the slider is at 1:
+
+update once every 10 milleseconds
+
+we should update 12 cents per update
+
+after each second we will have increased by an octave
 
 
-
-function counter(slider_name, incDecValue){
-
-	var osc_name = map.slider_name // associating the slider name with the osc it should control
-	
-	slider_name = clearInterval() // clearing the last timer that was set
-
-	if (incDecValue !== undefined){                  // if there is a value present in incDecValue, generate the addition interval
-		slider_name = setInterval(function(){
-			slider_name.frequency.value += ( 500 * incDecValue )  // bit of math to increase or decrease the tune
-		}, 500)													  // do it every 500ms. can be adjusted to taste
-	}
-}
+b = a x 2 ^ (n/1200)
 
 
-// I think I want this function to regenerate the setInterval anew each time
-// you move the sliders. If you hold the slider say 50% to the right of center,
-// it should be constantly sending a incDecValue of .5 .  This would then be multiplied
-// by 500 leading to an oscillator tone shift of +250 hz. If the slider is held in exactly this
-// position for another 500ms it will send another +250hz.
+a = frequency we know in the text box
 
-// setting frequcncies is done like this: slider_1.frequency.value = x
-// 
-// just realizing that my frequency variables are in the $(document).ready  scope...
-// that's probably a problem for this function if it's out in the general scope
-//
-// I also have not yet installed the map variable. 
+n = 12 cents
 
 
+b = 440 x 2 ^ (12/1200) // if slider is at 1
 
-<div id="osc_1_div">
-	<div class="freq_input">
-		<input id="osc_1_text" type="text">
-	</div>
-	<div id="slider_1" class="h_slider"></div>
-</div>
-
-<div id="osc_2_div">
-	<div class="freq_input">
-		<input id="osc_2_text" type="text">
-	</div>
-	<div id="slider_2" class="h_slider"></div>
-</div>
