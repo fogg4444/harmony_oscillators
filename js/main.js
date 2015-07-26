@@ -186,7 +186,7 @@ harmonyOscillatorsGlobalNamespace = {
 
 			});
 		});
-	}, // end initSliderListner
+	}, // end initSliderListener
 
 
 	initMuteButton : function(){
@@ -291,7 +291,7 @@ harmonyOscillatorsGlobalNamespace = {
 			$('#osc_world').append('<div id=' + osc_name + '><div class="freq_input"><input id=' + osc_text + ' type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
 			harmonyOscillatorsGlobalNamespace.initText(osc_text, osc_name);
 		});
-	}, // end GenerateOscWOrldHTML
+	}, // end generateOscWorldHTML
 
 	setOsc : function(freq, name){ // this needs to be fixed
 		if ( $.isNumeric(freq) ){
@@ -303,8 +303,8 @@ harmonyOscillatorsGlobalNamespace = {
 			window[name].frequency.value = freq; // this needs help here...
 			harmonyOscillatorsGlobalNamespace.setMath(freq, name);
 			harmonyOscillatorsGlobalNamespace.setInputText(freq, name)
-		}; // end setOsc
-	},
+		};
+	}, // end setOsc
 
 	// getOscValue : function(name){
 	// 	return name.frequency.value;
@@ -349,7 +349,7 @@ harmonyOscillatorsGlobalNamespace = {
 		this_input.val(freq);
 		// console.log( this_input.val() );
 		// console.log(freq, osc_name, this_input);
-	},
+	}, // end setInputText
 
 	initText : function(osc_text, osc_name){
 		// initial stuff to run on load
