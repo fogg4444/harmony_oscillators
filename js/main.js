@@ -7,7 +7,7 @@ $(document).ready(function(){
 
 	Tone.Master.mute = true; // this needs to go first to avoid any clicking
 
-HarmonyOscillatorsGlobalNamespace = {
+harmonyOscillatorsGlobalNamespace = {
 
 	intervals : {
 
