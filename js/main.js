@@ -160,7 +160,7 @@ $(document).ready(function(){
 					var osc_id = this_id.slice(0,-7) // removing '_slider' from slider name 'this_id'
 					var osc = window[osc_id];
 					var current_frequency = osc.frequency.value;
-					
+
 					var freqUpdateScalingFactor = 1200 / (1000 / updateSpeed); // 1000 = number of milliseconds in a second
 																			   // 1200 = cents in an octave
 
@@ -177,7 +177,6 @@ $(document).ready(function(){
 					console.log('updated freq',updatedFrequency)
 
 					setOsc(updatedFrequency , osc_id);
-
 				}
 
 				if (formatted_value > 0 || formatted_value < 0){
