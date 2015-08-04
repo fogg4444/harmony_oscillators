@@ -398,7 +398,6 @@ var harmonyOscillatorsGlobalNamespace = {
 
 		Tone.Master.mute = false; // forces audio to be unmuted for testing purposes
 	}
-
 }; // End harmonyOscillatorsGlobalNamespace
 
 
