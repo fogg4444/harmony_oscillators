@@ -171,7 +171,6 @@ var harmonyOscillatorsGlobalNamespace = {
 					var msPerOctave = 1000;
 
 					var centsPerInterval = (updateFrequencyIntervalTime * (1200 / msPerOctave) ) // assuming one second per 
-					console.log('centsPerInterval = ', centsPerInterval)
 					hogn.currentSliderValue[sliderId] = formatted_value;
 
 					var updateFrequency = function(){
@@ -252,8 +251,6 @@ var harmonyOscillatorsGlobalNamespace = {
 			panButton.css('background-color', 'green');
 		};
 
-		// console.log(hogn)
-
 		var setPan = function(input){
 			if (input === 'pan'){
 				// console.log('set pan');
@@ -267,7 +264,6 @@ var harmonyOscillatorsGlobalNamespace = {
 
 			};
 		};
-
 
 		panButton.bind('mousedown touchstart', function(){ // click event handler
 			if (hogn.initPanSetting === false){
@@ -285,6 +281,41 @@ var harmonyOscillatorsGlobalNamespace = {
 			};
 
 		});
+	},
+
+	initCopyButton : function(){
+		var hogn = harmonyOscillatorsGlobalNamespace;
+		var selector = $('#copy_osc_value');
+		selector.bind('mousedown touchstart', function(){
+			var osc1value = hogn.currentOscValues['osc_1'];
+			console.log(osc1value)
+			hogn.setOsc(osc1value, 'osc_2');
+			$(this).css('background-color','red')
+		});
+		$(document).bind('mouseup touchend', function(){
+			selector.css('background-color','grey');
+		});
+	},
+
+	initResetButton : function(){
+		var hogn = harmonyOscillatorsGlobalNamespace;
+		var selector = $('#reset_button');
+
+		selector.bind('mousedown touchstart', function(){
+			$(this).css('background-color','red')
+			hogn.setOsc(440, 'osc_1');
+			hogn.setOsc(440, 'osc_2');
+		});
+		$(document).bind('mouseup touchend', function(){
+			selector.css('background-color','grey');
+		});
+	},
+
+	initButtons : function(){
+		this.initPanButton();
+		this.initCopyButton();
+		this.initMuteButton();
+		this.initResetButton();
 	},
 
 	initIntervalFractionSelect : function(){
@@ -368,9 +399,7 @@ var harmonyOscillatorsGlobalNamespace = {
 		var freqLengthTest = freq.toString().length;
 		//console.log(freqLengthTest)
 
-		if (freqLengthTest > 5){
-			freq = hogn.summarizeLongDecimals(freq);
-		};
+		freq = hogn.summarizeLongDecimals(freq);
 
 		if (osc_name === undefined){
 			// reset all to 440
@@ -451,14 +480,15 @@ $(document).ready(function(){
 	hogn.initSliders();
 	hogn.generateOscAndPan();
 	hogn.initSliderListeners();
-	hogn.initPanButton();
 	hogn.initIntervalFractionSelect();
 
 	hogn.testingInitValues(); // set up faders for auto load. this is not how the userw will interact
 	
 	Tone.Master.mute = true;
 
-	hogn.initMuteButton();
+	hogn.initButtons();
+
+	// hogn.initMuteButton();
 
 	// console.log(Tone.Master)
 	// console.log(Tone.Master)
