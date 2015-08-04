@@ -12,6 +12,20 @@ var harmonyOscillatorsGlobalNamespace = {
 		};
 	},
 
+	scaleLogarithmically : function(input, minIn, maxIn, minOut, maxOut, scale){ // logarithmic scaling function with negative number support
+		if (input < 0){ // check if input is negative
+			var inputIsNegative = true;
+			input = Math.abs(input); // make input a real number so equation will work properly
+		};
+		var result = (Math.exp(((input-minIn)/(maxIn-minIn)-1)*scale)-1) / (Math.exp(-scale)-1)*(minOut-maxOut)+maxOut
+
+		if (inputIsNegative === true){ // if input is negative, make result negative.
+			return -result;
+		}else{
+			return result; // if input is not negative return positive result
+		};
+	},
+
 	summarizeLongDecimals : function(input){
 		return parseFloat(input).toPrecision(6) + '...';
 	},
@@ -59,11 +73,12 @@ var harmonyOscillatorsGlobalNamespace = {
 	},
 
 	initPanSetting : false, // true === binaural, false === matched - used for testing.
-	initMuteSetting : false, // true === muted, false === unmuted
-	osc_generate_array : ['osc_1','osc_2'],
-	current_osc_values : {}, // global memory for osc values. enables referencing by other math
-	slider_list : [], // stores a list of all sliders in the program. functions may loop through this list to act on all sliders.
+	initMuteSetting : true, // true === muted, false === unmuted
+	oscGenerateArray : ['osc_1','osc_2'],
+	currentOscValues : {}, // global memory for osc values. enables referencing by other math
+	sliderList : [], // stores a list of all sliders in the program. functions may loop through this list to act on all sliders.
 	osc_text_list : [],
+	currentSliderValue : [],
 
 	initSliders : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
@@ -82,9 +97,9 @@ var harmonyOscillatorsGlobalNamespace = {
 		};
 
 		var initFreqSliders = function(){
-			hogn.slider_list.forEach(function(input){ // frequency slider for each oscillator
-				var dom_input = document.getElementById(input) // temporary variable to feed into noUiSlider.create()	
-				noUiSlider.create(dom_input, { // generates the slider
+			hogn.sliderList.forEach(function(input){ // frequency slider for each oscillator
+				var domInput = document.getElementById(input) // temporary variable to feed into noUiSlider.create()	
+				noUiSlider.create(domInput, { // generates the slider
 					start: [50],
 					range: {
 						'min': 0,
@@ -100,9 +115,9 @@ var harmonyOscillatorsGlobalNamespace = {
 
 	resetSlider : function(){
 		// console.log('reset slider');
-		this.slider_list.forEach(function(input){
-			var dom_input = document.getElementById(input)
-			dom_input.noUiSlider.set(50);
+		this.sliderList.forEach(function(input){
+			var domInput = document.getElementById(input)
+			domInput.noUiSlider.set(50);
 		});
 	}, // end resetSlider
 
@@ -118,10 +133,10 @@ var harmonyOscillatorsGlobalNamespace = {
 		hogn.preMasterVolume = new Tone.Volume(0).toMaster();
 
 		// console.log('gen pan')
-		// console.log(osc_generate_array)
+		// console.log(oscGenerateArray)
 
 
-		this.osc_generate_array.forEach(function(x){
+		this.oscGenerateArray.forEach(function(x){
 			// console.log(x)
 			var this_panner = x + '_pan';
 
@@ -136,32 +151,61 @@ var harmonyOscillatorsGlobalNamespace = {
 
 		var hogn = harmonyOscillatorsGlobalNamespace;
 
-		// var counter = function(id, value){
-		// 	// console.log('bang counter: ' + id + value)
-		// 	var func = function(id, value){
-		// 		// console.log(' inside func  -- ' + id +' --- ' + value )
-		// 	}
-		// 	return func
-		// }
-
 		var initFreqSlidersListener = function(){
-			hogn.slider_list.forEach(function(input){ // run through all sliders in sliders list
-				var dom_input = document.getElementById(input);
-				var this_id = dom_input.id;
 
-				var closure_name = this_id + '_counter' // dynamically generate names for each version of closure
-				// this[closure_name] = counter(closure_name); // creates closures based on name from above
+			var hogn = harmonyOscillatorsGlobalNamespace;
 
-				dom_input.noUiSlider.on('update',function(values, handle){
+			hogn.sliderList.forEach(function(input){ // initialize all sliders in hogn.sliderList
+				var domInput = document.getElementById(input);
+				var sliderId = domInput.id;
+
+
+				var updateFrequencyInterval = null;
+
+				domInput.noUiSlider.on('update',function(values, handle){ // on slider motion, run below code
 					var value = values[handle];
-					var id = this_id;
 					var formatted_value = (value / 50) - 1; // normalize values into a +/-1 float value
-					// console.log(value, id)
-					// counter(id, value); // send all the nicely formatted data off the the counter function
-					// this[closure_name](id, formatted_value)
+					formatted_value = hogn.scaleLogarithmically(formatted_value, 0.0, 1.0, 0.0, 1.0, 9.0) // scale 0.0 to 1.0 on a log curve at a factor of 2
+
+					var updateFrequencyIntervalTime = 30;
+					var msPerOctave = 1000;
+
+					var centsPerInterval = (updateFrequencyIntervalTime * (1200 / msPerOctave) ) // assuming one second per 
+					console.log('centsPerInterval = ', centsPerInterval)
+					hogn.currentSliderValue[sliderId] = formatted_value;
+
+					var updateFrequency = function(){
+						var currentSliderValue = hogn.currentSliderValue[sliderId];
+						var thisOsc = sliderId.slice(0,5);
+
+						var currentOscValue = hogn.currentOscValues[thisOsc];
+						
+						console.log(currentSliderValue)
+
+						// equation to convert cents to 
+						var amountToAdd = currentSliderValue * ( (currentOscValue * Math.pow( 2, ( centsPerInterval /1200) ) ) - currentOscValue);
+						console.log('current osc value', currentOscValue, 'amountToAdd', amountToAdd)
+
+						var newFreq = currentOscValue + amountToAdd;
+
+						hogn.setOsc(newFreq, thisOsc);
+					};
+
+					if (formatted_value > 0 || formatted_value < 0) { // slider movement
+						if (updateFrequencyInterval === null){ // if timer is NOT yet set
+							updateFrequency();
+							updateFrequencyInterval = setInterval(updateFrequency, updateFrequencyIntervalTime);
+						}
+					}else{ // return to zero
+						clearInterval(updateFrequencyInterval);
+						updateFrequencyInterval = null;
+					};
 				});
+
 			});
-		}
+		};
+
+
 
 		var initMasterVolumeSliderListener = function(){
 			var masterVolumeFader = document.getElementById('master_volume_div');
@@ -212,12 +256,12 @@ var harmonyOscillatorsGlobalNamespace = {
 
 		var setPan = function(input){
 			if (input === 'pan'){
-				console.log('set pan');
+				// console.log('set pan');
 				hogn.osc_1_pan.pan.value = 0;
 				hogn.osc_2_pan.pan.value = 1;
 
 			}else if(input === 'off'){
-				console.log('kill pan');
+				// console.log('kill pan');
 				hogn.osc_1_pan.pan.value = .5;
 				hogn.osc_2_pan.pan.value = .5;
 
@@ -261,7 +305,7 @@ var harmonyOscillatorsGlobalNamespace = {
 			})
 			var multiplier = fraction_format[1];
 			console.log(multiplier)
-			var first_osc_value = parseFloat(hogn.current_osc_values['osc_1']);
+			var first_osc_value = parseFloat(hogn.currentOscValues['osc_1']);
 
 			var new_osc_2 = first_osc_value * multiplier;
 			console.log(new_osc_2);
@@ -293,10 +337,10 @@ var harmonyOscillatorsGlobalNamespace = {
 	generateOscContainerDiv : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
 
-		this.osc_generate_array.forEach(function(x){
+		this.oscGenerateArray.forEach(function(x){
 			var osc_name = x;
 			var slider_name = osc_name + '_slider';
-				hogn.slider_list.push(slider_name);
+				hogn.sliderList.push(slider_name);
 			var osc_text = osc_name + '_text';
 				hogn.osc_text_list.push(osc_text);
 
@@ -312,7 +356,7 @@ var harmonyOscillatorsGlobalNamespace = {
 			// console.log('set osc');
 			// console.log(name);
 			// console.log(freq);
-			hogn.current_osc_values[name] = freq; // dump the value into the global variable
+			hogn.currentOscValues[name] = parseFloat(freq); // dump the value into the global variable
 			hogn[name].frequency.value = freq; // this needs help here...
 			hogn.setMath(freq, name);
 			hogn.setInputText(freq, name)
@@ -321,16 +365,11 @@ var harmonyOscillatorsGlobalNamespace = {
 
 	setMath : function(freq, osc_name){
 		var hogn = harmonyOscillatorsGlobalNamespace;
-		var freq_length_test = freq.toString().length;
-		//console.log(freq_length_test)
+		var freqLengthTest = freq.toString().length;
+		//console.log(freqLengthTest)
 
-		if (freq_length_test > 5){
-			// console.log('greater than 5');
-			console.log('test')
-			console.log('freq', freq)
-			console.log('parse test', freq );
+		if (freqLengthTest > 5){
 			freq = hogn.summarizeLongDecimals(freq);
-			console.log('freq after parse', freq);
 		};
 
 		if (osc_name === undefined){
@@ -350,7 +389,7 @@ var harmonyOscillatorsGlobalNamespace = {
 		var osc_1_input = parseFloat( $('#osc_1_math').text() );
 		var osc_2_input = parseFloat( $('#osc_2_math').text() );
 
-		var result = Math.abs( osc_1_input - osc_2_input ) ;
+		var result = hogn.summarizeLongDecimals( Math.abs( osc_1_input - osc_2_input ) );
 		$('#result').html(result)
 	},// end setMath
 
@@ -368,7 +407,7 @@ var harmonyOscillatorsGlobalNamespace = {
 	initText : function(osc_text, osc_name){
 		// initial stuff to run on load
 		var hogn = harmonyOscillatorsGlobalNamespace;
-		var dom_input = document.getElementById(osc_text);
+		var domInput = document.getElementById(osc_text);
 
 		var textBind = function(value){
 
@@ -381,11 +420,11 @@ var harmonyOscillatorsGlobalNamespace = {
 
 		// initial page load listener
 		$(document).bind('ready', function(){
-			$(dom_input).val('440'); // set to default frequency
-			textBind( $(dom_input).val() );
+			$(domInput).val('440'); // set to default frequency
+			textBind( $(domInput).val() );
 		});
 		// litener for text changes
-		$(dom_input).bind('change paste keyup', function(){
+		$(domInput).bind('change paste keyup', function(){
 			textBind( $(this).val() );
 		});
 	}, // End initText
@@ -405,9 +444,7 @@ $(document).ready(function(){
 	console.log("document ready");
 	var hogn = harmonyOscillatorsGlobalNamespace;
 
-
 	Tone.Master.mute = true;
-
 
 	hogn.generateOscContainerDiv();
 	hogn.initMouseTouchUp();
@@ -418,6 +455,7 @@ $(document).ready(function(){
 	hogn.initIntervalFractionSelect();
 
 	hogn.testingInitValues(); // set up faders for auto load. this is not how the userw will interact
+	
 	Tone.Master.mute = true;
 
 	hogn.initMuteButton();
