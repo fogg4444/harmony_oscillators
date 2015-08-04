@@ -50,3 +50,20 @@ function counter(slider_name, incDecValue){
 	</div>
 	<div id="slider_2" class="h_slider"></div>
 </div>
+
+
+
+
+db to float
+v = 10 ^ (db / 20)
+
+float to db
+
+db = 20.0 * log( float );
+
+
+
+
+
+
+
