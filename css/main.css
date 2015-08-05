@@ -35,15 +35,49 @@ html, body{
 }
 
 #header{
-	height: 20%;
+	height: 10%;
+	width: 80%;
 	border: orange 1px solid;
 	position: relative;
 	text-align: center;
 }
 
+#master_volume_div_wrap{
+	width: 20%;
+	position: absolute;
+	height: 20%;
+	right: 0;
+	top: 0;
+	border: green 1px solid;
+}
+#master_volume_div{
+	position: relative;
+	top: 5%;
+	right: 4%;
+	height: 100%;
+	margin: 0 auto;
+}
+
+#button_header{
+	height: 10%;
+	width: 80%;
+	border: red 1px solid;
+	position: relative;
+}
+
 h1{
 	text-align: center;
 	font-weight: normal;
+	margin: 0;
+	padding: 0;
+	font-size: 1.5em;
+
+}
+
+#osc_container_div{
+	width: 100%;
+	height: 80%;
+	border: 1px red solid;
 }
 
 #math_world{
@@ -51,47 +85,40 @@ h1{
 	padding-left: 10%;
 	font-size: 1.5em;
 	margin: 0;
-	height: 10%;
+	height: 25%;
+	border: yellow 1px solid;
 }
 
 .top_button{
 	text-align: center;
-	width: 8%;
-	height: 45%;
+	width: 20%;
+	height: 100%;
 	position: absolute;
 	background-color: orange;
 	padding-bottom: 5%;	
-	top: 30%;
 	color: white;
 	cursor: default;
+
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px; /* future proofing */
+	-khtml-border-radius: 10px; /* for old Konqueror browsers */
 }
 .top_button p {
 	padding-top: 8%;
 }
 #mute_button{
-	right: 6%;
+	right: 8%;
 }
 #reset_button{
 	left: 5%;
 	background-color: grey;
 }
 #pan_button{
-	right: 15%;
+	right: 30%;
 }
 
-#master_volume_div{
-	position: absolute;
-	top: 12%;
-	right: 1%;
-	height: 75%;
-}
 
-#osc_container_div{
-	width: 100%;
-	height: 80%;
-	border: 1px red solid;
-	position: relative;
-}
 
 #copy_osc_value{
 	position: relative;
@@ -104,6 +131,11 @@ h1{
 	text-align: center;
 	font-size: .8em;
 	cursor: default;
+
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px; /* future proofing */
+	-khtml-border-radius: 10px; /* for old Konqueror browsers */
 }
 	#copy_osc_value p{
 		padding-top: 10%;
@@ -113,7 +145,8 @@ h1{
 	margin: 0 auto;
 	padding: 0;
 	position: absolute;
-	top: 50%;
+	left: 18%;
+	top: 70%;
 }
 
 #interval_menu{

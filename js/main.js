@@ -224,7 +224,7 @@ var harmonyOscillatorsGlobalNamespace = {
 		if (this.initMuteSetting === true){
 			// mute here
 			window.Tone.Master.mute = true;
-			muteButton.css('background-color', 'red');
+			muteButton.css('background-color', 'grey');
 		}else{
 			// unmute here
 			window.Tone.Master.mute = false;
@@ -237,7 +237,7 @@ var harmonyOscillatorsGlobalNamespace = {
 				$(this).css('background-color', 'green')
 			}else{
 				Tone.Master.mute = true;
-				$(this).css('background-color', 'red');
+				$(this).css('background-color', 'grey');
 			};
 		})
 	}, // end initMuteButton
@@ -246,7 +246,7 @@ var harmonyOscillatorsGlobalNamespace = {
 		var panButton = $('#pan_button');
 		var hogn = harmonyOscillatorsGlobalNamespace;
 		if (this.initPanSetting === false){ // initial coloring
-			panButton.css('background-color', 'red');
+			panButton.css('background-color', 'grey');
 		}else{
 			panButton.css('background-color', 'green');
 		};
@@ -274,7 +274,7 @@ var harmonyOscillatorsGlobalNamespace = {
 
 			}else{
 				hogn.initPanSetting = false;
-				$(this).css('background-color', 'red');
+				$(this).css('background-color', 'grey');
 				// set panning off here
 				setPan('off')
 
@@ -345,11 +345,12 @@ var harmonyOscillatorsGlobalNamespace = {
 			hogn.setInputText();
 		}
 
+		var interval_selects_div = $('#interval_selects_div');
+
+		interval_selects_div.append('<p>');
 		for( var menu in hogn.intervals){
 			// Generate select menues for each
-
-			var interval_selects_div = $('#interval_selects_div');
-			interval_selects_div.append('<p>' + menu.replace(/[_]/g, ' ') + '</p>')
+			interval_selects_div.append(menu.replace(/[_]/g, ' '))
 			interval_selects_div.append('<select class="interval_menu" id=' + menu + ' name=' + menu + '></select>')
 			var this_menu = $('#' + menu);
 			for( var interval_name in hogn.intervals[menu]){
@@ -359,10 +360,9 @@ var harmonyOscillatorsGlobalNamespace = {
 						.attr('value', interval_name)
 						.text(interval_name_no_underscore) );
 			}
-
-		// console.log(this_menu)
-		this_menu.change( selectMenuChange );
+		this_menu.change( selectMenuChange ); // event handler
 		}
+		interval_selects_div.append('</p>');
 	}, // end initIntervalFractionSelect
 
 	generateOscContainerDiv : function(){
