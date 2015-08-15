@@ -147,19 +147,14 @@ var harmonyOscillatorsGlobalNamespace = {
 		});
 	}, // end generateOscAndPan
 
-	initSliderListeners : function(){  // this whole section needs a lot of help... closures and things on the set interval
-
+	initSliderListeners : function(){  // Initiating pitch control slider event listeners and running requisite functions
 		var hogn = harmonyOscillatorsGlobalNamespace;
 
-		var initFreqSlidersListener = function(){
-
+		var initFreqSlidersListener = function(){ // Initiate slider listeners
 			var hogn = harmonyOscillatorsGlobalNamespace;
-
 			hogn.sliderList.forEach(function(input){ // initialize all sliders in hogn.sliderList
 				var domInput = document.getElementById(input);
 				var sliderId = domInput.id;
-
-
 				var updateFrequencyInterval = null;
 
 				domInput.noUiSlider.on('update',function(values, handle){ // on slider motion, run below code
@@ -167,26 +162,19 @@ var harmonyOscillatorsGlobalNamespace = {
 					var formatted_value = (value / 50) - 1; // normalize values into a +/-1 float value
 					formatted_value = hogn.scaleLogarithmically(formatted_value, 0.0, 1.0, 0.0, 1.0, 9.0) // scale 0.0 to 1.0 on a log curve at a factor of 2
 
+					// editable values
 					var updateFrequencyIntervalTime = 30;
 					var msPerOctave = 1000;
 
 					var centsPerInterval = (updateFrequencyIntervalTime * (1200 / msPerOctave) ) // assuming one second per 
 					hogn.currentSliderValue[sliderId] = formatted_value;
 
-					var updateFrequency = function(){
+					var updateFrequency = function(){ // Update frequency 
 						var currentSliderValue = hogn.currentSliderValue[sliderId];
 						var thisOsc = sliderId.slice(0,5);
-
 						var currentOscValue = hogn.currentOscValues[thisOsc];
-						
-						console.log(currentSliderValue)
-
-						// equation to convert cents to 
 						var amountToAdd = currentSliderValue * ( (currentOscValue * Math.pow( 2, ( centsPerInterval /1200) ) ) - currentOscValue);
-						console.log('current osc value', currentOscValue, 'amountToAdd', amountToAdd)
-
 						var newFreq = currentOscValue + amountToAdd;
-
 						hogn.setOsc(newFreq, thisOsc);
 					};
 
@@ -203,8 +191,6 @@ var harmonyOscillatorsGlobalNamespace = {
 
 			});
 		};
-
-
 
 		var initMasterVolumeSliderListener = function(){
 			var masterVolumeFader = document.getElementById('master_volume_div');
@@ -231,7 +217,11 @@ var harmonyOscillatorsGlobalNamespace = {
 			muteButton.css('background-color', 'green');
 		};
 
-		muteButton.bind('mousedown touchstart', function(){ // click event handler
+		muteButton.bind('touchstart',function(){
+			$(this).css('background-color','red');
+		});
+
+		muteButton.bind('mousedown touch', function(){ // click event handler
 			if (Tone.Master.mute === true){
 				Tone.Master.mute = false;
 				$(this).css('background-color', 'green')
@@ -265,7 +255,11 @@ var harmonyOscillatorsGlobalNamespace = {
 			};
 		};
 
-		panButton.bind('mousedown touchstart', function(){ // click event handler
+		panButton.bind('touchstart',function(){
+			$(this).css('background-color','red');
+		});
+
+		panButton.bind('mousedown touch', function(){ // click event handler
 			if (hogn.initPanSetting === false){
 				$(this).css('background-color', 'green');
 				hogn.initPanSetting = true;
@@ -283,7 +277,7 @@ var harmonyOscillatorsGlobalNamespace = {
 		});
 	},
 
-	initCopyButton : function(){
+	initCopyFreqButton : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
 		var selector = $('#copy_osc_value');
 		selector.bind('mousedown touchstart', function(){
@@ -313,7 +307,7 @@ var harmonyOscillatorsGlobalNamespace = {
 
 	initButtons : function(){
 		this.initPanButton();
-		this.initCopyButton();
+		this.initCopyFreqButton();
 		this.initMuteButton();
 		this.initResetButton();
 	},
@@ -347,11 +341,14 @@ var harmonyOscillatorsGlobalNamespace = {
 
 		var interval_selects_div = $('#interval_selects_div');
 
-		interval_selects_div.append('<p>');
 		for( var menu in hogn.intervals){
+			var temp_menu_sub_div_id = menu + '_sub_div';
+			interval_selects_div.append('<div id=' + temp_menu_sub_div_id + ' class="each_temp_sub_div">') // generate a sub div to contain each temperment name and menu line
+			var this_temp_sub_div_selector = $('#' + temp_menu_sub_div_id) // define new id for sub div holding this temperment selection menu
+
 			// Generate select menues for each
-			interval_selects_div.append(menu.replace(/[_]/g, ' '))
-			interval_selects_div.append('<select class="interval_menu" id=' + menu + ' name=' + menu + '></select>')
+			this_temp_sub_div_selector.append(menu.replace(/[_]/g, ' '))
+			this_temp_sub_div_selector.append('<select class="interval_menu" id=' + menu + ' name=' + menu + '></select>')
 			var this_menu = $('#' + menu);
 			for( var interval_name in hogn.intervals[menu]){
 				var interval_name_no_underscore = interval_name.replace(/[_]/g, " ")
@@ -360,9 +357,9 @@ var harmonyOscillatorsGlobalNamespace = {
 						.attr('value', interval_name)
 						.text(interval_name_no_underscore) );
 			}
-		this_menu.change( selectMenuChange ); // event handler
+			interval_selects_div.append('</div>')
+			this_menu.change( selectMenuChange ); // event handler
 		}
-		interval_selects_div.append('</p>');
 	}, // end initIntervalFractionSelect
 
 	generateOscContainerDiv : function(){
@@ -375,7 +372,9 @@ var harmonyOscillatorsGlobalNamespace = {
 			var osc_text = osc_name + '_text';
 				hogn.osc_text_list.push(osc_text);
 
-			$('#osc_container_div').append('<div id=' + osc_name + '><div class="freq_input"><input id=' + osc_text + ' type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
+				console.log(osc_name)
+
+			$( '#osc_div' ).append('<div id=' + osc_name + ' class="each_osc_div"><div class="freq_input"><input id=' + osc_text + ' class="freq_input_text" type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
 			hogn.initText(osc_text, osc_name);
 		});
 	}, // end generateOscContainerDiv

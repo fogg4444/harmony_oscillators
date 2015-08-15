@@ -11,6 +11,8 @@ html, body{
 	background-color: lightgrey;
 	font-family: sans-serif;
 
+	position: relative;
+
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -28,43 +30,6 @@ html, body{
     user-select: none;
 }
 
-#wrap{
-	width: 100%;
-	height: 100%;
-	position: relative;
-}
-
-#header{
-	height: 10%;
-	width: 80%;
-	border: orange 1px solid;
-	position: relative;
-	text-align: center;
-}
-
-#master_volume_div_wrap{
-	width: 20%;
-	position: absolute;
-	height: 20%;
-	right: 0;
-	top: 0;
-	border: green 1px solid;
-}
-#master_volume_div{
-	position: relative;
-	top: 5%;
-	right: 4%;
-	height: 100%;
-	margin: 0 auto;
-}
-
-#button_header{
-	height: 10%;
-	width: 80%;
-	border: red 1px solid;
-	position: relative;
-}
-
 h1{
 	text-align: center;
 	font-weight: normal;
@@ -74,112 +39,189 @@ h1{
 
 }
 
-#osc_container_div{
+/* Beginning of body */
+#wrap{
 	width: 100%;
-	height: 80%;
-	border: 1px red solid;
-}
-
-#math_world{
-	text-align: left;
-	padding-left: 10%;
-	font-size: 1.5em;
-	margin: 0;
-	height: 25%;
-	border: yellow 1px solid;
-}
-
-.top_button{
-	text-align: center;
-	width: 20%;
 	height: 100%;
 	position: absolute;
-	background-color: orange;
-	padding-bottom: 5%;	
-	color: white;
-	cursor: default;
-
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	border-radius: 10px; /* future proofing */
-	-khtml-border-radius: 10px; /* for old Konqueror browsers */
-}
-.top_button p {
-	padding-top: 8%;
-}
-#mute_button{
-	right: 8%;
-}
-#reset_button{
-	left: 5%;
-	background-color: grey;
-}
-#pan_button{
-	right: 30%;
 }
 
-
-
-#copy_osc_value{
-	position: relative;
-	left: 47%;
-	top: 14.6%;
-	height: 7.5%;
-	width: 6%;
-	background-color: grey;
-	color: lightgrey;
-	text-align: center;
-	font-size: .8em;
-	cursor: default;
-
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	border-radius: 10px; /* future proofing */
-	-khtml-border-radius: 10px; /* for old Konqueror browsers */
-}
-	#copy_osc_value p{
-		padding-top: 10%;
+	#header{
+		height: 10%;
+		width: 80%;
+		/*border: orange 1px solid;*/
+		position: relative;
+		text-align: center;
 	}
 
+
+	#master_volume_div_wrap{
+		width: 20%;
+		position: absolute;
+		padding-top: 4%;
+		height: 20%;
+		right: 0;
+		top: 0;
+		/*border: green 1px solid;*/
+	}
+		#master_volume_div{
+			position: relative;
+			top: 5%;
+			right: 4%;
+			height: 100%;
+			margin: 0 auto;
+		}
+
+	#button_header{
+		height: 10%;
+		/*width: 80%;*/
+		border: red 1px solid;
+		position: relative;
+		margin: 0 auto;
+		text-align: center;
+	}
+		.top_button{
+			/*text-align: center;*/
+			height: 100%;
+			width: 20%;
+			/*position: absolute;*/
+			float: left;
+			color: white;
+			cursor: default;
+
+
+/*			-moz-border-radius: 10px;
+			-webkit-border-radius: 10px;
+			border-radius: 10px;  future proofing 
+			-khtml-border-radius: 10px; /* for old Konqueror browsers */*/
+		}
+		.top_button div {
+		}
+		.top_button p{
+			padding: 0;
+			/*margin: 0;*/
+		}
+
+		#mute_button{
+			/*right: 8%;*/
+		}
+		#reset_button{
+			/*left: 5%;*/
+			background-color: grey;
+		}
+		#pan_button{
+			/*right: 40%;*/
+		}
+
+
+	#below_header{
+		width: 100%;
+		height: 80%;
+		top: 20%;
+		position: absolute;
+		/*border: 1px red solid;*/
+	}
+
+		#math_div{
+			position: relative;
+			top: 0;
+			text-align: left;
+			padding-left: 5%;
+			font-size: 1.5em;
+			margin: 0;
+			height: 35%;
+			/*border: yellow 5px solid;*/
+		}
+		#math_div p{
+			margin: 0;
+			padding: 0;
+		}
+
+		#osc_div{
+			width: 95%;
+			height: 30%;
+			margin: 0 auto;
+			/*border: 5px purple solid;*/
+			position: relative;
+			top: 0%;
+		}
+
+			/* Slider style settings */
+			.noUi-target{
+				background-color: green;
+			}
+
+			.noUi-handle{
+				background-color: darkblue;
+			}
+
+			/* Oscillator styling */
+			.each_osc_div{
+				/*background-color: red;*/
+			}
+
+			.freq_input_text{
+				width: 100%;
+				font-size: 1.2em;
+				text-align: left;
+			}
+
+			.freq_input{
+				margin-bottom: 5%;
+			}
+
+			#osc_1{
+				float: left;
+				width: 50%;
+				padding-right: 5%;
+			}
+
+			#osc_2{
+				float: left;
+				width: 50%;
+				padding-left: 5%;
+			}
+
+			#copy_osc_value{
+				position: absolute;
+				left: 46.3%;
+				top: 1.5%;
+				margin: 0;
+				padding: 0;
+				width: 8%;
+				height: 21%;
+				background-color: grey;
+				/*border: red solid 1px;*/
+				color: white;
+				text-align: center;
+				font-size: .8em;
+				/*cursor: default;*/
+
+				-moz-border-radius: 10px;
+				-webkit-border-radius: 10px;
+				border-radius: 10px;  future proofing 
+				-khtml-border-radius: 10px; /* for old Konqueror browsers */
+			}
+
+
+/* Interval / Temperment selction menu styling */
 #interval_selects_div{
 	margin: 0 auto;
-	padding: 0;
-	position: absolute;
-	left: 18%;
-	top: 70%;
-}
-
-#interval_menu{
-	
-}
-
-.freq_input{
-	margin-bottom: 5%;
-}
-
-.noUi-target{
-	background-color: green;
-}
-
-.noUi-handle{
-	background-color: darkblue;
-}
-
-#osc_1_text,#osc_2_text{
 	width: 100%;
-	text-align: left;
-	font-size: 2em;
+	padding: 0;
+	position: relative;
+	/*border: yellow 5px solid;*/
+	height: 30%;
+	top: 0%;
 }
 
-#osc_1{
-	float: left;
-	width: 50%;
-	padding: 5%;
+.each_temp_sub_div{
+	width: 100%;
+	padding-left: 5%;
+	padding-right: 5%;
+	padding-bottom: 4%;
 }
 
-#osc_2{
-	float: left;
-	width: 50%;
-	padding: 5%;
-
+.each_temp_sub_div select {
+	float: right;
 }
