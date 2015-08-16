@@ -8,7 +8,7 @@
 	<script src="js/nouislider.js"></script>
 	<script src="js/jquery-1.11.3.min.js"></script>
 	<script src="js/screenfull.js"></script>
-	<script type="text/javascript" src="http://cdn.tonejs.org/latest/Tone.min.js"></script>
+	<script type="text/javascript" src="js/tone.js"></script>
 	<link rel="stylesheet" href="css/nouislider.css">
 	<link rel="stylesheet" href="css/main.css">
 
@@ -18,20 +18,33 @@
 	<div id="wrap">
 		<div id="header">
 			<h1>Harmony Oscillators</h1>
-			<p>sliders aren't working yet</p>
-			<div id="mute_button"><p>Mute</p></div>
 		</div>
-		<div id="osc_world">
-			<div id="math_world">
-				<span>
+		<div id="master_volume_div_wrap">
+			<div id="master_volume_div"></div>
+		</div>
+		<div id="button_header">
+			<div id="reset_button" class="top_button"> <div> <p>Reset</p> </div> </div>
+			<div id="mute_button" class="top_button"> <div> <p>Audio</p> </div> </div>
+			<div id="pan_button" class="top_button"> <div> <p>Binural</p> </div> </div>
+		</div>
+		<div id="below_header">
+			<div id="math_div">
+				<!-- <span> -->
 					<p>Beat Frequency: 
 						<span id="osc_1_math"></span> &amp;
 						<span id="osc_2_math"></span> =
 						<span id="result"></span> Hz
 					</p>
-				</span>
+					<p>Interval Math: 
+						<span id="interval_math"></span>
+					</p>
+				<!-- </span> -->
 			</div>
-		<!-- Oscillators are inserted here -->
+			<div id="osc_div">
+				<!-- Oscillators are inserted here -->
+				<div id="copy_osc_value"> > </div>
+			</div>
+
 			<div id="interval_selects_div">
 				<!-- <select name="interval_fraction_select" id="interval_fraction_select"></select> -->
 				<!-- <select name="equal_temp_select" id="equal_temp_select"></select> -->
