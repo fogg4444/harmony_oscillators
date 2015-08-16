@@ -41,34 +41,34 @@ var harmonyOscillatorsGlobalNamespace = {
 	
 	intervals : {
 		'Just_Intonation' : {
-			'Unison' 		 : '1/1',
-			'Minor_Second'   : '16/15',
-			'Major_Second'   : '9/8',
-			'Minor_Third'    : '6/5',
-			'Major_Third'    : '5/4',
-			'Perfect_Fourth' : '4/3',
-			'Tritone'        : '7/5',
-			'Perfect_Fifth'  : '3/2',
-			'Minor Sixth'    : '8/5',
-			'Major_Sixth'    : '5/3',
-			'Minor_Seventh'  : '16/9',
-			'Major_Seventh'  : '15/8',
-			'Octave'         : '2/1',
+			'Unison' 		 : ['1/1',   1/1   ],
+			'Minor_Second'   : ['16/15', 16/15 ],
+			'Major_Second'   : ['9/8',   9/8   ],
+			'Minor_Third'    : ['6/5',   6/5   ],
+			'Major_Third'    : ['5/4',   5/4   ],
+			'Perfect_Fourth' : ['4/3',   4/3   ],
+			'Tritone'        : ['7/5',   7/5   ],
+			'Perfect_Fifth'  : ['3/2',   3/2   ],
+			'Minor Sixth'    : ['8/5',   8/5   ],
+			'Major_Sixth'    : ['5/3',   5/3   ],
+			'Minor_Seventh'  : ['16/9',  16/9  ],
+			'Major_Seventh'  : ['15/8',  15/8  ],
+			'Octave'         : ['2/1',   2/1   ]
 		},
-		'Other_Temp' : {
-			'Unison' 		 : '1/1',
-			'Minor_Second'   : '16/15',
-			'Major_Second'   : '9/8',
-			'Minor_Third'    : '6/5',
-			'Major_Third'    : '5/4',
-			'Perfect_Fourth' : '4/3',
-			'Tritone'        : '7/5',
-			'Perfect_Fifth'  : '3/2',
-			'Minor Sixth'    : '8/5',
-			'Major_Sixth'    : '5/3',
-			'Minor_Seventh'  : '16/9',
-			'Major_Seventh'  : '15/8',
-			'Octave'         : '2/1',
+		'Equal_Temperment' : {
+			'Unison' 		 : ['2^(0/12)',  Math.pow( 2, (0/12)  ) ],
+			'Minor_Second'   : ['2^(1/12)',  Math.pow( 2, (1/12)  ) ],
+			'Major_Second'   : ['2^(2/12)',  Math.pow( 2, (2/12)  ) ],
+			'Minor_Third'    : ['2^(3/12)',  Math.pow( 2, (3/12)  ) ],
+			'Major_Third'    : ['2^(4/12)',  Math.pow( 2, (4/12)  ) ],
+			'Perfect_Fourth' : ['2^(5/12)',  Math.pow( 2, (5/12)  ) ],
+			'Tritone'        : ['2^(6/12)',  Math.pow( 2, (6/12)  ) ],
+			'Perfect_Fifth'  : ['2^(7/12)',  Math.pow( 2, (7/12)  ) ],
+			'Minor Sixth'    : ['2^(8/12)',  Math.pow( 2, (8/12)  ) ],
+			'Major_Sixth'    : ['2^(9/12)',  Math.pow( 2, (9/12)  ) ],
+			'Minor_Seventh'  : ['2^(10/12)', Math.pow( 2, (10/12) ) ],
+			'Major_Seventh'  : ['2^(11/12)', Math.pow( 2, (11/12) ) ],
+			'Octave'         : ['2^(12/12)', Math.pow( 2, (12/12) ) ]
 		}
 	},
 
@@ -77,8 +77,9 @@ var harmonyOscillatorsGlobalNamespace = {
 	oscGenerateArray : ['osc_1','osc_2'],
 	currentOscValues : {}, // global memory for osc values. enables referencing by other math
 	sliderList : [], // stores a list of all sliders in the program. functions may loop through this list to act on all sliders.
-	osc_text_list : [],
+	oscTextList : [],
 	currentSliderValue : [],
+	intervalSelectMenuList : [],
 
 	initSliders : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
@@ -131,11 +132,6 @@ var harmonyOscillatorsGlobalNamespace = {
 		var hogn = harmonyOscillatorsGlobalNamespace;
 
 		hogn.preMasterVolume = new Tone.Volume(0).toMaster();
-
-		// console.log('gen pan')
-		// console.log(oscGenerateArray)
-
-
 		this.oscGenerateArray.forEach(function(x){
 			// console.log(x)
 			var this_panner = x + '_pan';
@@ -176,6 +172,9 @@ var harmonyOscillatorsGlobalNamespace = {
 						var amountToAdd = currentSliderValue * ( (currentOscValue * Math.pow( 2, ( centsPerInterval /1200) ) ) - currentOscValue);
 						var newFreq = currentOscValue + amountToAdd;
 						hogn.setOsc(newFreq, thisOsc);
+
+						hogn.resetIntervalSelectMenu(); // finally, reset all the interval select menus as they are no longer theoretically correct
+						hogn.clearIntervalMath();
 					};
 
 					if (formatted_value > 0 || formatted_value < 0) { // slider movement
@@ -187,10 +186,10 @@ var harmonyOscillatorsGlobalNamespace = {
 						clearInterval(updateFrequencyInterval);
 						updateFrequencyInterval = null;
 					};
-				});
 
-			});
-		};
+				}); // end domInput.noUiSlider.on('update'...
+			}); // end hogn.sliderList.forEach(...
+		}; // end initFreqSlidersListener()
 
 		var initMasterVolumeSliderListener = function(){
 			var masterVolumeFader = document.getElementById('master_volume_div');
@@ -312,48 +311,65 @@ var harmonyOscillatorsGlobalNamespace = {
 		this.initResetButton();
 	},
 
+	clearIntervalMath : function(){
+		$('#interval_math').html('');
+	},
+
 	initIntervalFractionSelect : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
 
 		var selectMenuChange = function(){
-			var selection_key = $(this).val();
-			var selection_index = hogn.intervals[this.id][selection_key];
-			var fraction_format = selection_index
-				.split('/')
-				.reverse()
-				.map(function(x){
-					//console.log(x);
-					return parseFloat(x);
-				});
-			fraction_format = fraction_format.map(function(x){ // formatting the fractions into useable arrays for multiplication
-				return x / fraction_format[0];
-			})
-			var multiplier = fraction_format[1];
-			console.log(multiplier)
-			var first_osc_value = parseFloat(hogn.currentOscValues['osc_1']);
 
-			var new_osc_2 = first_osc_value * multiplier;
-			console.log(new_osc_2);
-			hogn.setOsc(new_osc_2, 'osc_2');
-			console.log('test ' + selection_index)
-			hogn.setInputText();
+			var thisMenuId = $(this).context.id;
+			var selectionKey = $(this).val();
+			var selectionIndexString = hogn.intervals[this.id][selectionKey][0];
+			var intervalMultiplicationFactor = hogn.intervals[this.id][selectionKey][1];
+			var firstOscValue = parseFloat(hogn.currentOscValues['osc_1']); // get and store value of osc_1
+
+			console.log('selectionIndexString: ', selectionIndexString);
+			console.log('intervalMultiplicationFactor: ', intervalMultiplicationFactor);
+			console.log('thisMenuId: ', thisMenuId);
+			console.log('selectionKey: ', selectionKey);
+			console.log('firstOscValue: ',firstOscValue);
+
+			// multiply firstOscValue by intervalMultiplicationFactor
+			var newOsc2Value = firstOscValue * intervalMultiplicationFactor;
+			console.log(newOsc2Value)
+
+			// drop selection index string into interval math display
+			$('#interval_math').html(firstOscValue + ' * ' + '( ' + selectionIndexString + ' ) = ' +  newOsc2Value);
+
+
+			// set the oscillator
+			hogn.setOsc(newOsc2Value, 'osc_2');
+
+			// reset all menus except 'thisMenuId'
+			hogn.resetIntervalSelectMenu(thisMenuId);
 		}
 
-		var interval_selects_div = $('#interval_selects_div');
+		var interval_selects_div = $('#interval_selects_div'); // choose where to put these selection menus
 
-		for( var menu in hogn.intervals){
+		for( var menu in hogn.intervals){ // Generate sub_div to contain each temperment selection menu line
 			var temp_menu_sub_div_id = menu + '_sub_div';
 			interval_selects_div.append('<div id=' + temp_menu_sub_div_id + ' class="each_temp_sub_div">') // generate a sub div to contain each temperment name and menu line
 			var this_temp_sub_div_selector = $('#' + temp_menu_sub_div_id) // define new id for sub div holding this temperment selection menu
+
+			// append each menu id into global intervalSelectMenuList
+			hogn.intervalSelectMenuList.push(menu);
 
 			// Generate select menues for each
 			this_temp_sub_div_selector.append(menu.replace(/[_]/g, ' '))
 			this_temp_sub_div_selector.append('<select class="interval_menu" id=' + menu + ' name=' + menu + '></select>')
 			var this_menu = $('#' + menu);
+
+			// append 'seelct interval' text as first entry in drop down'
+			this_menu.append( $("<option></option>").text('Select Interval'));
+
+			// append values from 'intervals' object into select respective menus
 			for( var interval_name in hogn.intervals[menu]){
 				var interval_name_no_underscore = interval_name.replace(/[_]/g, " ")
 				this_menu
-					.append( $("<option></option>")
+					.append( $("<option value='initial_value' ></option>")
 						.attr('value', interval_name)
 						.text(interval_name_no_underscore) );
 			}
@@ -361,6 +377,24 @@ var harmonyOscillatorsGlobalNamespace = {
 			this_menu.change( selectMenuChange ); // event handler
 		}
 	}, // end initIntervalFractionSelect
+
+	resetIntervalSelectMenu : function(selected_menu){ // incoming variable is usually the menu making the selection. reset all others. if no variable, reset all.
+		var hogn = harmonyOscillatorsGlobalNamespace;
+		var menusToReset = hogn.intervalSelectMenuList.slice(0); // clone intervalSelecMenuList into new local variable
+
+		if (selected_menu !== undefined){
+			// we are passed an argument. Reset all menus but the 'selected_menu'
+			// eliminate 'selected_menu' from 'menusToReset'
+			var indexOfSelectedMenu = menusToReset.indexOf(selected_menu);
+			// delete selected_menu from menusToReset using indexOfSelectedMenu index number
+			menusToReset.splice(indexOfSelectedMenu, 1); // splice at indexOfSelectedMenu position. only splice out one array entry
+		};
+
+		for(var menu in menusToReset){ // iterate through the array and reset menus
+			var this_menu = menusToReset[menu]; // shortcut
+			document.getElementById(this_menu).selectedIndex = 0; // find all menus and reset them to first index position value
+		};
+	},// end resetIntervalSelectMenu
 
 	generateOscContainerDiv : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
@@ -370,9 +404,9 @@ var harmonyOscillatorsGlobalNamespace = {
 			var slider_name = osc_name + '_slider';
 				hogn.sliderList.push(slider_name);
 			var osc_text = osc_name + '_text';
-				hogn.osc_text_list.push(osc_text);
+				hogn.oscTextList.push(osc_text);
 
-				console.log(osc_name)
+				// console.log(osc_name)
 
 			$( '#osc_div' ).append('<div id=' + osc_name + ' class="each_osc_div"><div class="freq_input"><input id=' + osc_text + ' class="freq_input_text" type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
 			hogn.initText(osc_text, osc_name);
@@ -420,6 +454,7 @@ var harmonyOscillatorsGlobalNamespace = {
 		var result = hogn.summarizeLongDecimals( Math.abs( osc_1_input - osc_2_input ) );
 		$('#result').html(result)
 	},// end setMath
+
 
 	setInputText : function(freq, osc_name){
 		// console.log('set text')
