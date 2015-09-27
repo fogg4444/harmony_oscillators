@@ -11,9 +11,8 @@
 	<script type="text/javascript" src="js/tone.js"></script>
 	<link rel="stylesheet" href="css/nouislider.css">
 	<link rel="stylesheet" href="css/main.css">
-
-
 </head>
+
 <body>
 	<div id="wrap">
 		<div id="header">
@@ -24,7 +23,7 @@
 		</div>
 		<div id="button_header">
 			<div id="reset_button" class="top_button"> <div> <p>Reset</p> </div> </div>
-			<div id="mute_button" class="top_button"> <div> <p>Audio</p> </div> </div>
+			<div id="mute_button" class="top_button"> <div> <p>Audio On/Off</p> </div> </div>
 			<div id="pan_button" class="top_button"> <div> <p>Binural</p> </div> </div>
 		</div>
 		<div id="below_header">
@@ -48,6 +47,9 @@
 			<div id="interval_selects_div">
 				<!-- <select name="interval_fraction_select" id="interval_fraction_select"></select> -->
 				<!-- <select name="equal_temp_select" id="equal_temp_select"></select> -->
+			</div>
+			<div id="oscilloscope_div">
+				<canvas id="oscilloscope_canvas"></canvas>
 			</div>
 		</div>
 		

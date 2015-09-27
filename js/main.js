@@ -31,8 +31,10 @@ var harmonyOscillatorsGlobalNamespace = {
 	}, // end isNumeric
 
 	resizeWindow : function(){ // keeping the css height at 100%
+		var hogn = harmonyOscillatorsGlobalNamespace;
 		var window_height_px = $(window).outerHeight(true)  + "px";
 		$("#wrap").css('height', window_height_px);
+		hogn.renderCanvas();
 	}, // end resize Window
 	
 	intervals : {
@@ -70,7 +72,7 @@ var harmonyOscillatorsGlobalNamespace = {
 
 	initPanSetting : false, // true === binaural, false === matched - used for testing.
 	initMuteSetting : true, // true === muted, false === unmuted
-	oscGenerateArray : ['osc_1','osc_2'],
+	oscGenerateArray : ['osc_1','osc_2'], // initiates creation of oscillators and divs to contain them
 	currentOscValues : {}, // global memory for osc values. enables referencing by other math
 	sliderList : [], // stores a list of all sliders in the program. functions may loop through this list to act on all sliders.
 	oscTextList : [],
@@ -268,8 +270,6 @@ var harmonyOscillatorsGlobalNamespace = {
 				setPan('off')
 
 			};
-// >>>>>>> pre_pierce_slider_meeting
-
 		});
 	},
 
@@ -281,6 +281,7 @@ var harmonyOscillatorsGlobalNamespace = {
 			console.log(osc1value)
 			hogn.setOsc(osc1value, 'osc_2');
 			$(this).css('background-color','red')
+			hogn.clearIntervalMath();
 		});
 		$(document).bind('mouseup touchend', function(){
 			selector.css('background-color','grey');
@@ -495,7 +496,46 @@ var harmonyOscillatorsGlobalNamespace = {
 
 		var masterVolumeFader = document.getElementById('master_volume_div');
 		masterVolumeFader.noUiSlider.set(100); // set fader to max
-	}
+	},
+
+	oscCanvas : 0,
+	oscContext : 0,
+
+	initCanvas : function(){
+		var hogn = harmonyOscillatorsGlobalNamespace;
+
+		hogn.oscCanvas = document.getElementById('oscilloscope_canvas');
+		hogn.oscContext = hogn.oscCanvas.getContext("2d");
+
+		this.renderCanvas();
+	},
+
+	renderCanvas : function(){
+		var hogn = harmonyOscillatorsGlobalNamespace;
+
+		// console.log('test renderCanvas');
+		// console.log('osc canvas: ', hogn.oscCanvas);
+		// console.log('osc context: ', hogn.oscContext);
+
+		var canvasWidth = hogn.oscCanvas.scrollWidth;
+		var canvasHeight = hogn.oscCanvas.scrollHeight;
+		var verticalCenter = canvasHeight / 2;
+		var horizontalCenter = canvasWidth / 2;
+
+		console.log(canvasWidth, canvasHeight);
+		console.log(horizontalCenter, verticalCenter);
+
+		hogn.oscContext.clearRect(0, 0, canvasWidth, canvasHeight);
+		hogn.oscContext.fillRect(0, 0, canvasWidth, canvasHeight); // black background
+
+		// white horizontal centerline
+		hogn.oscContext.beginPath();
+		hogn.oscContext.moveTo(0, verticalCenter);
+		hogn.oscContext.lineTo(canvasWidth, verticalCenter);
+		hogn.oscContext.strokeStyle = "#FFFFFF";
+		hogn.oscContext.stroke();
+
+	},
 }; // End harmonyOscillatorsGlobalNamespace
 
 
@@ -513,18 +553,15 @@ $(document).ready(function(){
 	hogn.initIntervalFractionSelect();
 
 	hogn.testingInitValues(); // set up faders for auto load. this is not how the userw will interact
-	
 	Tone.Master.mute = true;
-
 	hogn.initButtons();
-
-	// hogn.initMuteButton();
-
-	// console.log(Tone.Master)
-	// console.log(Tone.Master)
+	
+	hogn.initCanvas();
 
 	hogn.resizeWindow();
 	$(window).resize(function(){
 		hogn.resizeWindow();
 	});
+
+
 });
