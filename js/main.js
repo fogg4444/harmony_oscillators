@@ -34,6 +34,7 @@ var harmonyOscillatorsGlobalNamespace = {
 		var hogn = harmonyOscillatorsGlobalNamespace;
 		var window_height_px = $(window).outerHeight(true)  + "px";
 		$("#wrap").css('height', window_height_px);
+		
 		hogn.renderCanvas();
 	}, // end resize Window
 	
@@ -501,32 +502,37 @@ var harmonyOscillatorsGlobalNamespace = {
 	oscCanvas : 0,
 	oscContext : 0,
 
-	initCanvas : function(){
+	renderCanvas : function(){
+		console.log('------------Render Canvas-----------')
 		var hogn = harmonyOscillatorsGlobalNamespace;
 
+		// assign oscDiv to specified dom element with jquery
+		var oscDiv = $('#oscilloscope_div');
+
+		// clear canvas from oscilliscope div
+		// oscDiv.empty();
+		// console.log('emptied')
+		
+		var canvasWidth = oscDiv[0].scrollWidth;
+		var canvasHeight = oscDiv[0].scrollHeight;
+
+		// insert canvas element into oscilliscope_div
+		oscDiv.html('<canvas width='+ canvasWidth +' height='+ canvasHeight +' id="oscilloscope_canvas"></div>');
+
+		// init canvas
 		hogn.oscCanvas = document.getElementById('oscilloscope_canvas');
 		hogn.oscContext = hogn.oscCanvas.getContext("2d");
 
-		this.renderCanvas();
-	},
 
-	renderCanvas : function(){
-		var hogn = harmonyOscillatorsGlobalNamespace;
+		var verticalCenter = (canvasHeight / 2);
+		var horizontalCenter = (canvasWidth / 2);
 
-		// console.log('test renderCanvas');
-		// console.log('osc canvas: ', hogn.oscCanvas);
-		// console.log('osc context: ', hogn.oscContext);
-
-		var canvasWidth = hogn.oscCanvas.scrollWidth;
-		var canvasHeight = hogn.oscCanvas.scrollHeight;
-		var verticalCenter = canvasHeight / 2;
-		var horizontalCenter = canvasWidth / 2;
-
-		console.log(canvasWidth, canvasHeight);
-		console.log(horizontalCenter, verticalCenter);
+		// console.log(canvasWidth, canvasHeight);
+		// console.log(horizontalCenter, verticalCenter);
 
 		hogn.oscContext.clearRect(0, 0, canvasWidth, canvasHeight);
 		hogn.oscContext.fillRect(0, 0, canvasWidth, canvasHeight); // black background
+		// console.log('find the right height: ', hogn.oscCanvas)
 
 		// white horizontal centerline
 		hogn.oscContext.beginPath();
@@ -534,6 +540,9 @@ var harmonyOscillatorsGlobalNamespace = {
 		hogn.oscContext.lineTo(canvasWidth, verticalCenter);
 		hogn.oscContext.strokeStyle = "#FFFFFF";
 		hogn.oscContext.stroke();
+
+		// waveform draw
+		
 
 	},
 }; // End harmonyOscillatorsGlobalNamespace
@@ -556,9 +565,9 @@ $(document).ready(function(){
 	Tone.Master.mute = true;
 	hogn.initButtons();
 	
-	hogn.initCanvas();
 
 	hogn.resizeWindow();
+
 	$(window).resize(function(){
 		hogn.resizeWindow();
 	});
