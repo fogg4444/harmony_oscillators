@@ -79,6 +79,9 @@ var harmonyOscillatorsGlobalNamespace = {
 	oscTextList : [],
 	currentSliderValue : [],
 	intervalSelectMenuList : [],
+	// colors for the first two waveforms
+	oscColors : ['#FF0000','#0099FF'],
+	willRenderCanvas : true,
 
 	initSliders : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
@@ -91,8 +94,6 @@ var harmonyOscillatorsGlobalNamespace = {
 					'min' : 0,
 					'max' : 100
 				},
-				orientation : 'vertical',
-				direction : 'rtl'
 			});
 		};
 
@@ -124,6 +125,7 @@ var harmonyOscillatorsGlobalNamespace = {
 	initMouseTouchUp : function(){
 		$(window).bind('mouseup touchend', function(){ // bind any completion of input to slider reset function
 			harmonyOscillatorsGlobalNamespace.resetSlider();
+
 		});
 	}, // end initMouseTouchUp
 
@@ -200,6 +202,7 @@ var harmonyOscillatorsGlobalNamespace = {
 
 		initFreqSlidersListener();
 		initMasterVolumeSliderListener();
+		// initCanvasZoomSliderListener();
 	}, // end initSliderListeners
 
 	initMuteButton : function(){
@@ -398,6 +401,7 @@ var harmonyOscillatorsGlobalNamespace = {
 	generateOscContainerDiv : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
 
+		var i = 0;
 		this.oscGenerateArray.forEach(function(x){
 			var osc_name = x;
 			var slider_name = osc_name + '_slider';
@@ -405,9 +409,10 @@ var harmonyOscillatorsGlobalNamespace = {
 			var osc_text = osc_name + '_text';
 				hogn.oscTextList.push(osc_text);
 
-				// console.log(osc_name)
-
 			$( '#osc_div' ).append('<div id=' + osc_name + ' class="each_osc_div"><div class="freq_input"><input id=' + osc_text + ' class="freq_input_text" type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
+			$('#' + osc_text).css('border', 'solid 2px' + hogn.oscColors[i]);
+			console.log(hogn.oscColors[i]);
+			i = i + 1; // increment counter
 			hogn.initText(osc_text, osc_name);
 		});
 	}, // end generateOscContainerDiv
@@ -424,6 +429,7 @@ var harmonyOscillatorsGlobalNamespace = {
 			hogn[name].frequency.value = freq; // this needs help here...
 			hogn.setMath(freq, name);
 			hogn.setInputText(freq, name)
+			hogn.renderCanvas();
 		};
 	},  // end setOsc
 
@@ -502,54 +508,160 @@ var harmonyOscillatorsGlobalNamespace = {
 	oscCanvas : 0,
 	oscContext : 0,
 
-	renderCanvas : function(){
-		console.log('------------Render Canvas-----------')
+	initCanvasZoomSlider : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
+		// console.log('init canvas slider');
+		$('#oscilliscope_zoom_div').append('<div id="canvasZoomSlider"></div>');
+		// hogn.sliderList.push()
+		var zoomSlider = document.getElementById('canvasZoomSlider');
+		noUiSlider.create(zoomSlider, {
+			start: [50],
+			connect: false,
+			range: {
+				'min': 0,
+				'max': 100
+			}
+		});
 
-		// assign oscDiv to specified dom element with jquery
-		var oscDiv = $('#oscilloscope_div');
-
-		// clear canvas from oscilliscope div
-		// oscDiv.empty();
-		// console.log('emptied')
-		
-		var canvasWidth = oscDiv[0].scrollWidth;
-		var canvasHeight = oscDiv[0].scrollHeight;
-
-		// insert canvas element into oscilliscope_div
-		oscDiv.html('<canvas width='+ canvasWidth +' height='+ canvasHeight +' id="oscilloscope_canvas"></div>');
-
-		// init canvas
-		hogn.oscCanvas = document.getElementById('oscilloscope_canvas');
-		hogn.oscContext = hogn.oscCanvas.getContext("2d");
-
-
-		var verticalCenter = (canvasHeight / 2);
-		var horizontalCenter = (canvasWidth / 2);
-
-		// console.log(canvasWidth, canvasHeight);
-		// console.log(horizontalCenter, verticalCenter);
-
-		hogn.oscContext.clearRect(0, 0, canvasWidth, canvasHeight);
-		hogn.oscContext.fillRect(0, 0, canvasWidth, canvasHeight); // black background
-		// console.log('find the right height: ', hogn.oscCanvas)
-
-		// white horizontal centerline
-		hogn.oscContext.beginPath();
-		hogn.oscContext.moveTo(0, verticalCenter);
-		hogn.oscContext.lineTo(canvasWidth, verticalCenter);
-		hogn.oscContext.strokeStyle = "#FFFFFF";
-		hogn.oscContext.stroke();
-
-		// waveform draw
-		
-
+		var initCanvasZoomSliderListener = function(){
+			var canvasZoomSlider = document.getElementById('canvasZoomSlider');
+			console.log(canvasZoomSlider);
+			canvasZoomSlider.noUiSlider.on('update', function(values, handle){
+				console.log('test zoom resonse');
+				console.log(values, handle);
+				
+			});
+		};
+		initCanvasZoomSliderListener();
 	},
+
+	renderCanvas : function(){
+		var hogn = harmonyOscillatorsGlobalNamespace;
+		
+		if (hogn.willRenderCanvas === true){
+
+			// don't run unless there are two values in currentOscValues
+			var currentOscValuesArray = [];
+			for (var osc in hogn.currentOscValues){
+				currentOscValuesArray.push(hogn.currentOscValues[osc]);
+			}
+			if (currentOscValuesArray.length < 2){
+				return;
+			};
+
+			// assign oscDiv to specified dom element with jquery
+			var oscDiv = $('#oscilloscope_div');
+
+			// clear canvas from oscilliscope div
+			oscDiv.empty();
+			
+			// easier names for canvas positions
+			var canvasWidth = oscDiv[0].scrollWidth;
+			var canvasHeight = oscDiv[0].scrollHeight;
+			var canvasVerticalCenter = (canvasHeight / 2);
+			var canvasHorizontalCenter = (canvasWidth / 2);
+			var canvasTop = 0;
+			var canvasBottom = canvasHeight;
+			var canvasLeft = 0;
+			var canvasRight = canvasWidth;
+			var canvasCurveHeignt = ((canvasHeight / 2) * .9) ;
+
+			// insert canvas element into oscilliscope_div
+			oscDiv.html('<canvas width='+ canvasWidth +' height='+ canvasHeight +' id="oscilloscope_canvas"></div>');
+
+			// init canvas
+			hogn.oscCanvas = document.getElementById('oscilloscope_canvas');
+			hogn.oscContext = hogn.oscCanvas.getContext("2d");
+
+			hogn.oscContext.clearRect(0, 0, canvasWidth, canvasHeight);
+			hogn.oscContext.fillRect(0, 0, canvasWidth, canvasHeight); // black background
+
+			// white horizontal centerline
+			hogn.oscContext.beginPath();
+			hogn.oscContext.moveTo(canvasLeft, canvasVerticalCenter);
+			hogn.oscContext.lineTo(canvasRight, canvasVerticalCenter);
+			hogn.oscContext.strokeStyle = "#FFFFFF";
+			hogn.oscContext.stroke();
+
+			// function to draw a waveform
+			var drawWaveShape = function(numberOfCompleteWaves, color){
+				var numberOfAmplitudePeaks = numberOfCompleteWaves * 2;
+				var numberOfLoopRuns = Math.ceil(numberOfAmplitudePeaks);
+				var pointsPerAplitudePeak = canvasWidth / numberOfAmplitudePeaks;
+				var waveCanvasXStartPosition = 0; // initiate starting position at
+				var waveAmplitude = .8;
+
+				hogn.oscContext.beginPath();
+				hogn.oscContext.moveTo(canvasLeft, canvasVerticalCenter); // start all waves at canvas left on zero line
+
+				var drawQuadraticCurve = function(posOrNeg){
+					hogn.oscContext.beginPath();
+					hogn.oscContext.moveTo(waveCanvasXStartPosition, canvasVerticalCenter);
+					
+					var controlX = waveCanvasXStartPosition + (pointsPerAplitudePeak / 2);
+					if (posOrNeg === true){ // wave peak is positive
+						var controlY = (-canvasVerticalCenter) * waveAmplitude;
+					}else{ // wave peak is negative
+						var controlY = canvasHeight + (canvasVerticalCenter * waveAmplitude)
+					};
+					var endX = waveCanvasXStartPosition + pointsPerAplitudePeak;
+					var endY = canvasVerticalCenter;
+
+					hogn.oscContext.quadraticCurveTo(controlX, controlY, endX, endY);
+					hogn.oscContext.strokeStyle = color;
+					hogn.oscContext.stroke();
+
+					waveCanvasXStartPosition = waveCanvasXStartPosition + pointsPerAplitudePeak;
+				};
+
+				for(var i = 1; i <= numberOfLoopRuns; i++){ // run for loop for each aplitude peak. idexed at 1.
+					if ( (i % 2)===0 ){ // check if divisible by two
+						drawQuadraticCurve(false) // draw negative peak wave
+					}else{
+						drawQuadraticCurve(true) // draw positive peak wave
+					};
+				};
+			};
+
+			// // Put smaller frequency on top visual layer
+			// take currentOscValuesArray and put it into sortable array 'sortableOscValues'
+			var sortableOscValues = [];
+
+			for (var osc in hogn.currentOscValue){
+				console.log(hogn.currentOscValues)
+
+				sortableOscValues.push( hogn.currentOscValues );
+			};
+			// sort this arrray by numerical value of the oscillator value.
+			sortableOscValues.sort( function(a,b){return a[1] - b[1]} );
+			// console.log(sortableOscValues);
+
+			// Factor osc values
+			var oscValue1 = currentOscValuesArray[0];
+			var oscValue2 = currentOscValuesArray[1];
+			var osc1DivByosc2 = oscValue1 / oscValue2;
+
+			// TODO
+
+			// the waveforms need to correspond in color to their appropriate oscValue.
+			// collect osc name and osc value together in one sub array. should be in sortableOscValues.
+
+			// process these together and associate colors with oscName somehow in the for loop below.
+
+			var loopIndex = 0;
+			for (var oscName in hogn.currentOscValues){
+				var oscValue = hogn.currentOscValues[oscName];
+				var thisColor = hogn.oscColors[loopIndex];
+				drawWaveShape(oscValue, thisColor) // This is the command which draws the colored waveform
+				loopIndex = loopIndex + 1;
+			}; // end drawWaveShap loop
+		};// end if_statement on whole function
+	}, // end renderCanvas
 }; // End harmonyOscillatorsGlobalNamespace
 
 
 $(document).ready(function(){
-	console.log("document ready");
+	// console.log("document ready");
 	var hogn = harmonyOscillatorsGlobalNamespace;
 
 	Tone.Master.mute = true;
@@ -558,10 +670,12 @@ $(document).ready(function(){
 	hogn.initMouseTouchUp();
 	hogn.initSliders();
 	hogn.generateOscAndPan();
-	hogn.initSliderListeners();
 	hogn.initIntervalFractionSelect();
+	hogn.willRenderCanvas = false;
+	// hogn.initCanvasZoomSlider();
+	hogn.initSliderListeners();
 
-	hogn.testingInitValues(); // set up faders for auto load. this is not how the userw will interact
+	hogn.testingInitValues(); // set up faders for auto load. this is not how the users will interact
 	Tone.Master.mute = true;
 	hogn.initButtons();
 	
@@ -571,6 +685,4 @@ $(document).ready(function(){
 	$(window).resize(function(){
 		hogn.resizeWindow();
 	});
-
-
 });
