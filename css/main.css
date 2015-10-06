@@ -8,7 +8,7 @@ html, body{
 	margin: auto 0;
 	padding: 0;
 
-	background-color: lightgrey;
+	background-color: #CCCCCC;
 	font-family: sans-serif;
 
 	position: relative;
@@ -218,7 +218,7 @@ h1{
 	margin: 0 auto;
 	width: 100%;
 	height: 29%;
-	border: 1px orange solid;
+	/*border: 1px orange solid;*/
 }
 	#oscilloscope_canvas{
 /*		border: 2px red dotted;

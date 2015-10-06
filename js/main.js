@@ -80,7 +80,10 @@ var harmonyOscillatorsGlobalNamespace = {
 	currentSliderValue : [],
 	intervalSelectMenuList : [],
 	// colors for the first two waveforms
-	oscColors : ['#FF0000','#0099FF'],
+	oscilloscopeWaveformColors : ['#FF0000','#0000FF'],
+	oscilloscopeHorizontalLineColor : '#000000',
+	oscilloscopeBackgroundColor : '#CCCCCC',
+	canvasZoomValue : 40, // initiating value. this will change with use
 	willRenderCanvas : true,
 
 	initSliders : function(){
@@ -410,8 +413,7 @@ var harmonyOscillatorsGlobalNamespace = {
 				hogn.oscTextList.push(osc_text);
 
 			$( '#osc_div' ).append('<div id=' + osc_name + ' class="each_osc_div"><div class="freq_input"><input id=' + osc_text + ' class="freq_input_text" type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
-			$('#' + osc_text).css('border', 'solid 2px' + hogn.oscColors[i]);
-			console.log(hogn.oscColors[i]);
+			$('#' + osc_text).css('border', 'solid 2px' + hogn.oscilloscopeWaveformColors[i]);
 			i = i + 1; // increment counter
 			hogn.initText(osc_text, osc_name);
 		});
@@ -515,7 +517,7 @@ var harmonyOscillatorsGlobalNamespace = {
 		// hogn.sliderList.push()
 		var zoomSlider = document.getElementById('canvasZoomSlider');
 		noUiSlider.create(zoomSlider, {
-			start: [50],
+			start: [ hogn.canvasZoomValue ],
 			connect: false,
 			range: {
 				'min': 0,
@@ -525,11 +527,14 @@ var harmonyOscillatorsGlobalNamespace = {
 
 		var initCanvasZoomSliderListener = function(){
 			var canvasZoomSlider = document.getElementById('canvasZoomSlider');
-			console.log(canvasZoomSlider);
-			canvasZoomSlider.noUiSlider.on('update', function(values, handle){
-				console.log('test zoom resonse');
-				console.log(values, handle);
-				
+			// console.log(canvasZoomSlider);
+			canvasZoomSlider.noUiSlider.on('update', function(values, handle, floatNumber){
+				floatNumber = floatNumber / 100;
+				console.log(floatNumber);
+				floatNumber = hogn.scaleLogarithmically(floatNumber, 0, 1, 0, 1, 7);
+				console.log(floatNumber);
+				hogn.canvasZoomValue = floatNumber;
+				hogn.renderCanvas();
 			});
 		};
 		initCanvasZoomSliderListener();
@@ -574,13 +579,14 @@ var harmonyOscillatorsGlobalNamespace = {
 			hogn.oscContext = hogn.oscCanvas.getContext("2d");
 
 			hogn.oscContext.clearRect(0, 0, canvasWidth, canvasHeight);
+			hogn.oscContext.fillStyle = hogn.oscilloscopeBackgroundColor;
 			hogn.oscContext.fillRect(0, 0, canvasWidth, canvasHeight); // black background
 
 			// white horizontal centerline
 			hogn.oscContext.beginPath();
 			hogn.oscContext.moveTo(canvasLeft, canvasVerticalCenter);
 			hogn.oscContext.lineTo(canvasRight, canvasVerticalCenter);
-			hogn.oscContext.strokeStyle = "#FFFFFF";
+			hogn.oscContext.strokeStyle = hogn.oscilloscopeHorizontalLineColor;
 			hogn.oscContext.stroke();
 
 			// function to draw a waveform
@@ -648,15 +654,31 @@ var harmonyOscillatorsGlobalNamespace = {
 
 			// process these together and associate colors with oscName somehow in the for loop below.
 
+			if (hogn.currentOscValues['osc_1'] > 99999 || hogn.currentOscValues['osc_2'] > 99999){
+				console.log('greater than error')
+				hogn.oscContext.clearRect(0, 0, canvasWidth, canvasHeight);
+				hogn.oscContext.font = '15px helvetica';
+				hogn.oscContext.fillStyle = 'red';
+				hogn.oscContext.textAlign = 'center';
+				hogn.oscContext.fillText('Oscillator value exceeding limit of 99999', canvasHorizontalCenter ,canvasVerticalCenter);
+				return;
+			};
+
 			var loopIndex = 0;
 			for (var oscName in hogn.currentOscValues){
 				var oscValue = hogn.currentOscValues[oscName];
-				var thisColor = hogn.oscColors[loopIndex];
+				var thisColor = hogn.oscilloscopeWaveformColors[loopIndex];
+				var zoomAmount = hogn.canvasZoomValue * 1.5; // scaling factor of zoom power. enables fine tuning of visual display.
+				// console.log(zoomAmount)
+				oscValue = oscValue * zoomAmount;
 				drawWaveShape(oscValue, thisColor) // This is the command which draws the colored waveform
 				loopIndex = loopIndex + 1;
 			}; // end drawWaveShap loop
+
 		};// end if_statement on whole function
+
 	}, // end renderCanvas
+
 }; // End harmonyOscillatorsGlobalNamespace
 
 
@@ -671,8 +693,8 @@ $(document).ready(function(){
 	hogn.initSliders();
 	hogn.generateOscAndPan();
 	hogn.initIntervalFractionSelect();
-	hogn.willRenderCanvas = false;
-	// hogn.initCanvasZoomSlider();
+	hogn.willRenderCanvas = true;
+	hogn.initCanvasZoomSlider();
 	hogn.initSliderListeners();
 
 	hogn.testingInitValues(); // set up faders for auto load. this is not how the users will interact
