@@ -569,7 +569,7 @@ var harmonyOscillatorsGlobalNamespace = {
 			var canvasBottom = canvasHeight;
 			var canvasLeft = 0;
 			var canvasRight = canvasWidth;
-			var canvasCurveHeignt = ((canvasHeight / 2) * .9) ;
+			// var canvasCurveHeight = ((canvasHeight / 2) * 1) ;
 
 			// insert canvas element into oscilliscope_div
 			oscDiv.html('<canvas width='+ canvasWidth +' height='+ canvasHeight +' id="oscilloscope_canvas"></div>');
@@ -595,7 +595,7 @@ var harmonyOscillatorsGlobalNamespace = {
 				var numberOfLoopRuns = Math.ceil(numberOfAmplitudePeaks);
 				var pointsPerAplitudePeak = canvasWidth / numberOfAmplitudePeaks;
 				var waveCanvasXStartPosition = 0; // initiate starting position at
-				var waveAmplitude = .8;
+				var waveAmplitude = .2;
 
 				hogn.oscContext.beginPath();
 				hogn.oscContext.moveTo(canvasLeft, canvasVerticalCenter); // start all waves at canvas left on zero line
@@ -654,6 +654,53 @@ var harmonyOscillatorsGlobalNamespace = {
 
 			// process these together and associate colors with oscName somehow in the for loop below.
 
+
+
+
+			//==================
+			var drawThirdWave = function(curve_func, color){
+				
+				var canvasWaveResolution = 1; // Signifies how many pixels to skip. 1 is 1to1 ratio. Every pixel rendered.
+
+				for(var i = 0; i < canvasWidth; i += canvasWaveResolution){
+					console.log(i);
+					var xPosition = i;
+					var relativePiPosition = (xPosition / canvasWidth) * (2 * Math.PI);
+					// console.log(relativePiPosition);
+					var yPosition = curve_func(relativePiPosition) + canvasVerticalCenter;
+
+					hogn.oscContext.lineTo(xPosition, yPosition);
+				}
+				hogn.oscContext.strokeStyle = color;
+				hogn.oscContext.stroke();
+			}
+
+
+			// Create simple local variables for osc values
+			var osc1 = hogn.currentOscValues.osc_1;
+			var osc2 = hogn.currentOscValues.osc_2;
+
+			var amplitudeScalingFactorSetting = .5; // 1 is full height.
+			var aplitudeScalingFactor = canvasVerticalCenter * amplitudeScalingFactorSetting;
+
+			// Draw first wave
+			var firstWave = function(x){
+				return aplitudeScalingFactor * Math.sin(osc1 * -x) // add osc1 back here
+			};
+			// Draw second wave
+			var secondWave = function(x){
+				return aplitudeScalingFactor * Math.sin(osc2 * -x) // Negative sigs are here to counter act the canvas system of 0,0 being at the top left.
+			};
+			// Draw third wave
+			var thirdWave = function(x){
+				return firstWave(x) + secondWave(x)
+			};
+
+			drawThirdWave(thirdWave, "#000000");
+
+			//==================
+
+
 			if (hogn.currentOscValues['osc_1'] > 99999 || hogn.currentOscValues['osc_2'] > 99999){
 				console.log('greater than error')
 				hogn.oscContext.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -670,7 +717,7 @@ var harmonyOscillatorsGlobalNamespace = {
 				var thisColor = hogn.oscilloscopeWaveformColors[loopIndex];
 				var zoomAmount = hogn.canvasZoomValue * 1.5; // scaling factor of zoom power. enables fine tuning of visual display.
 				// console.log(zoomAmount)
-				oscValue = oscValue * zoomAmount;
+				oscValue = oscValue //* zoomAmount;
 				drawWaveShape(oscValue, thisColor) // This is the command which draws the colored waveform
 				loopIndex = loopIndex + 1;
 			}; // end drawWaveShap loop
