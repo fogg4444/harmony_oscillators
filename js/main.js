@@ -80,11 +80,13 @@ var harmonyOscillatorsGlobalNamespace = {
 	currentSliderValue : [],
 	intervalSelectMenuList : [],
 	// colors for the first two waveforms
-	oscilloscopeWaveformColors : ['#FF0000','#0000FF'],
+	oscilloscopeWaveformColors : ['#FF0000','#0000FF','#FF00FF'],
+	oscilloscopeWaveformColorsLight : ["#FFCCCC","#CCCCFF","#FFCCFF"],
 	oscilloscopeHorizontalLineColor : '#000000',
 	oscilloscopeBackgroundColor : '#CCCCCC',
 	canvasZoomValue : 40, // initiating value. this will change with use
 	willRenderCanvas : true,
+	waveFormVisible : [true, true, true],
 
 	initSliders : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
@@ -726,6 +728,70 @@ var harmonyOscillatorsGlobalNamespace = {
 
 	}, // end renderCanvas
 
+	initCanvasWaveEnableButtons : function(){
+		var hogn = harmonyOscillatorsGlobalNamespace;
+
+		var wave_1 = $('#wave_1');
+		var wave_2 = $('#wave_2');
+		var wave_3 = $('#wave_3');
+		if (hogn.waveFormVisible[0]){
+			wave_1.css("background-color", hogn.oscilloscopeWaveformColors[0]);
+		}else{
+			wave_1.css("background-color", hogn.oscilloscopeWaveformColorsLight[0]);
+		};
+		if (hogn.waveFormVisible[1]){
+			wave_2.css("background-color", hogn.oscilloscopeWaveformColors[1]);
+		}else{
+			wave_2.css("background-color", hogn.oscilloscopeWaveformColorsLight[1]);
+		};
+		if (hogn.waveFormVisible[2]){
+			wave_3.css("background-color", hogn.oscilloscopeWaveformColors[2]);
+		}else{
+			wave_3.css("background-color", hogn.oscilloscopeWaveformColorsLight[2]);
+		};
+
+
+		//  -------- Inititate button responsiveness here --------
+
+		// enable touchy responsive red coloring on interaction
+		$('.wave_enable_button').bind('touchstart',function(){
+			$(this).css('background-color','red');
+		});
+
+		wave_1.bind('mousedown touch', function(){
+			if (hogn.waveFormVisible[0]){ // true it is visible
+				hogn.waveFormVisible[0] = false;
+				$(this).css("background-color", hogn.oscilloscopeWaveformColorsLight[0]);
+			}else{
+				hogn.waveFormVisible[0] = true;
+				$(this).css("background-color", hogn.oscilloscopeWaveformColors[0]);
+			};
+			hogn.renderCanvas();
+		});
+
+		wave_2.bind('mousedown touch', function(){
+			if (hogn.waveFormVisible[1]){ // true it is visible
+				hogn.waveFormVisible[1] = false;
+				$(this).css("background-color", hogn.oscilloscopeWaveformColorsLight[1]);
+			}else{
+				hogn.waveFormVisible[1] = true;
+				$(this).css("background-color", hogn.oscilloscopeWaveformColors[1]);
+			};
+			hogn.renderCanvas();
+		});
+
+		wave_3.bind('mousedown touch', function(){
+			if (hogn.waveFormVisible[2]){ // true it is visible
+				hogn.waveFormVisible[2] = false;
+				$(this).css("background-color", hogn.oscilloscopeWaveformColorsLight[2]);
+			}else{
+				hogn.waveFormVisible[2] = true;
+				$(this).css("background-color", hogn.oscilloscopeWaveformColors[2]);
+			};
+			hogn.renderCanvas();
+		});
+	},// End initCanvasWaveEnableButtons
+
 }; // End harmonyOscillatorsGlobalNamespace
 
 
@@ -743,6 +809,8 @@ $(document).ready(function(){
 	hogn.willRenderCanvas = true;
 	hogn.initCanvasZoomSlider();
 	hogn.initSliderListeners();
+	hogn.initCanvasWaveEnableButtons();
+
 
 	hogn.testingInitValues(); // set up faders for auto load. this is not how the users will interact
 	Tone.Master.mute = true;
