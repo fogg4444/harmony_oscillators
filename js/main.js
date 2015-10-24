@@ -37,6 +37,7 @@ var harmonyOscillatorsGlobalNamespace = {
 		
 		hogn.renderCanvas();
 	}, // end resize Window
+
 	
 	intervals : {
 		'Just_Intonation' : {
@@ -79,14 +80,26 @@ var harmonyOscillatorsGlobalNamespace = {
 	oscTextList : [],
 	currentSliderValue : [],
 	intervalSelectMenuList : [],
-	// colors for the first two waveforms
-	oscilloscopeWaveformColors : ['#FF0000','#0000FF','#FF00FF'],
-	oscilloscopeWaveformColorsLight : ["#FFCCCC","#CCCCFF","#FFCCFF"],
-	oscilloscopeHorizontalLineColor : '#000000',
-	oscilloscopeBackgroundColor : '#CCCCCC',
+	oscHorizontalLineColor : '#000000',
+	oscBackgroundColor : '#CCCCCC',
+	globalColorObject : {
+		osc_1 : {
+			heavy : '#FF0000',
+			light : '#FFCCCC',
+		},
+		osc_2 : {
+			heavy : '#0000FF',
+			light : '#CCCCFF',
+		},
+		osc_3 : {
+			heavy : '#FF00FF',
+			light : '#FFCCFF',
+		},
+	},
 	canvasZoomValue : 40, // initiating value. this will change with use
 	willRenderCanvas : true,
 	waveFormVisible : [true, true, true],
+	globalAmplitudeScalingFactorSetting : 1, // 1 is full height
 
 	initSliders : function(){
 		var hogn = harmonyOscillatorsGlobalNamespace;
@@ -415,7 +428,8 @@ var harmonyOscillatorsGlobalNamespace = {
 				hogn.oscTextList.push(osc_text);
 
 			$( '#osc_div' ).append('<div id=' + osc_name + ' class="each_osc_div"><div class="freq_input"><input id=' + osc_text + ' class="freq_input_text" type="text"></div><div id=' + slider_name + ' class="h_slider"></div></div>');
-			$('#' + osc_text).css('border', 'solid 2px' + hogn.oscilloscopeWaveformColors[i]);
+			$('#' + osc_text).css('border', 'solid 2px' + hogn.globalColorObject[osc_name].heavy);
+
 			i = i + 1; // increment counter
 			hogn.initText(osc_text, osc_name);
 		});
@@ -529,12 +543,9 @@ var harmonyOscillatorsGlobalNamespace = {
 
 		var initCanvasZoomSliderListener = function(){
 			var canvasZoomSlider = document.getElementById('canvasZoomSlider');
-			// console.log(canvasZoomSlider);
 			canvasZoomSlider.noUiSlider.on('update', function(values, handle, floatNumber){
 				floatNumber = floatNumber / 100;
-				console.log(floatNumber);
 				floatNumber = hogn.scaleLogarithmically(floatNumber, 0, 1, 0, 1, 7);
-				console.log(floatNumber);
 				hogn.canvasZoomValue = floatNumber;
 				hogn.renderCanvas();
 			});
@@ -571,7 +582,6 @@ var harmonyOscillatorsGlobalNamespace = {
 			var canvasBottom = canvasHeight;
 			var canvasLeft = 0;
 			var canvasRight = canvasWidth;
-			// var canvasCurveHeight = ((canvasHeight / 2) * 1) ;
 
 			// insert canvas element into oscilliscope_div
 			oscDiv.html('<canvas width='+ canvasWidth +' height='+ canvasHeight +' id="oscilloscope_canvas"></div>');
@@ -581,15 +591,9 @@ var harmonyOscillatorsGlobalNamespace = {
 			hogn.oscContext = hogn.oscCanvas.getContext("2d");
 
 			hogn.oscContext.clearRect(0, 0, canvasWidth, canvasHeight);
-			hogn.oscContext.fillStyle = hogn.oscilloscopeBackgroundColor;
+			hogn.oscContext.fillStyle = hogn.oscBackgroundColor;
 			hogn.oscContext.fillRect(0, 0, canvasWidth, canvasHeight); // black background
 
-			// white horizontal centerline
-			hogn.oscContext.beginPath();
-			hogn.oscContext.moveTo(canvasLeft, canvasVerticalCenter);
-			hogn.oscContext.lineTo(canvasRight, canvasVerticalCenter);
-			hogn.oscContext.strokeStyle = hogn.oscilloscopeHorizontalLineColor;
-			hogn.oscContext.stroke();
 
 			// function to draw a waveform
 			var drawWaveShape = function(numberOfCompleteWaves, color){
@@ -597,20 +601,22 @@ var harmonyOscillatorsGlobalNamespace = {
 				var numberOfLoopRuns = Math.ceil(numberOfAmplitudePeaks);
 				var pointsPerAplitudePeak = canvasWidth / numberOfAmplitudePeaks;
 				var waveCanvasXStartPosition = 0; // initiate starting position at
-				var waveAmplitude = .2;
 
 				hogn.oscContext.beginPath();
 				hogn.oscContext.moveTo(canvasLeft, canvasVerticalCenter); // start all waves at canvas left on zero line
 
+
+				var osc1andosc2AmplitudeScalingFactor = hogn.globalAmplitudeScalingFactorSetting * .02;
+				
 				var drawQuadraticCurve = function(posOrNeg){
 					hogn.oscContext.beginPath();
 					hogn.oscContext.moveTo(waveCanvasXStartPosition, canvasVerticalCenter);
 					
 					var controlX = waveCanvasXStartPosition + (pointsPerAplitudePeak / 2);
 					if (posOrNeg === true){ // wave peak is positive
-						var controlY = (-canvasVerticalCenter) * waveAmplitude;
+						var controlY = (-canvasVerticalCenter) * osc1andosc2AmplitudeScalingFactor;
 					}else{ // wave peak is negative
-						var controlY = canvasHeight + (canvasVerticalCenter * waveAmplitude)
+						var controlY = canvasHeight + (canvasVerticalCenter * osc1andosc2AmplitudeScalingFactor)
 					};
 					var endX = waveCanvasXStartPosition + pointsPerAplitudePeak;
 					var endY = canvasVerticalCenter;
@@ -642,22 +648,6 @@ var harmonyOscillatorsGlobalNamespace = {
 			};
 			// sort this arrray by numerical value of the oscillator value.
 			sortableOscValues.sort( function(a,b){return a[1] - b[1]} );
-			// console.log(sortableOscValues);
-
-			// Factor osc values
-			var oscValue1 = currentOscValuesArray[0];
-			var oscValue2 = currentOscValuesArray[1];
-			var osc1DivByosc2 = oscValue1 / oscValue2;
-
-			// TODO
-
-			// the waveforms need to correspond in color to their appropriate oscValue.
-			// collect osc name and osc value together in one sub array. should be in sortableOscValues.
-
-			// process these together and associate colors with oscName somehow in the for loop below.
-
-
-
 
 			//==================
 			var drawThirdWave = function(curve_func, color){
@@ -665,7 +655,7 @@ var harmonyOscillatorsGlobalNamespace = {
 				var canvasWaveResolution = 1; // Signifies how many pixels to skip. 1 is 1to1 ratio. Every pixel rendered.
 
 				for(var i = 0; i < canvasWidth; i += canvasWaveResolution){
-					console.log(i);
+					// console.log(i);
 					var xPosition = i;
 					var relativePiPosition = (xPosition / canvasWidth) * (2 * Math.PI);
 					// console.log(relativePiPosition);
@@ -682,27 +672,30 @@ var harmonyOscillatorsGlobalNamespace = {
 			var osc1 = hogn.currentOscValues.osc_1;
 			var osc2 = hogn.currentOscValues.osc_2;
 
-			var amplitudeScalingFactorSetting = .5; // 1 is full height.
-			var aplitudeScalingFactor = canvasVerticalCenter * amplitudeScalingFactorSetting;
+			var thirdWaveAplitudeScalingFactor = (canvasHeight * .25) * hogn.globalAmplitudeScalingFactorSetting;
+			
+
+			var osc1osc2ZoomFactor = hogn.canvasZoomValue * 1.5;
+			var thirdWaveZoomFactor = hogn.canvasZoomValue * 1.5;
 
 			// Draw first wave
 			var firstWave = function(x){
-				return aplitudeScalingFactor * Math.sin(osc1 * -x) // add osc1 back here
+				return thirdWaveAplitudeScalingFactor * Math.sin( (thirdWaveZoomFactor * osc1) * -x) // add osc1 back here
 			};
 			// Draw second wave
 			var secondWave = function(x){
-				return aplitudeScalingFactor * Math.sin(osc2 * -x) // Negative sigs are here to counter act the canvas system of 0,0 being at the top left.
+				return thirdWaveAplitudeScalingFactor * Math.sin( (thirdWaveZoomFactor * osc2) * -x) // Negative sigs are here to counter act the canvas system of 0,0 being at the top left.
 			};
 			// Draw third wave
 			var thirdWave = function(x){
 				return firstWave(x) + secondWave(x)
 			};
 
-			drawThirdWave(thirdWave, "#000000");
+			if (hogn.waveFormVisible[2]){
+				drawThirdWave(thirdWave, hogn.globalColorObject.osc_3.heavy);
+			};
 
-			//==================
-
-
+			// Too many waves requested! - error
 			if (hogn.currentOscValues['osc_1'] > 99999 || hogn.currentOscValues['osc_2'] > 99999){
 				console.log('greater than error')
 				hogn.oscContext.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -713,16 +706,33 @@ var harmonyOscillatorsGlobalNamespace = {
 				return;
 			};
 
-			var loopIndex = 0;
-			for (var oscName in hogn.currentOscValues){
-				var oscValue = hogn.currentOscValues[oscName];
-				var thisColor = hogn.oscilloscopeWaveformColors[loopIndex];
-				var zoomAmount = hogn.canvasZoomValue * 1.5; // scaling factor of zoom power. enables fine tuning of visual display.
-				// console.log(zoomAmount)
-				oscValue = oscValue //* zoomAmount;
-				drawWaveShape(oscValue, thisColor) // This is the command which draws the colored waveform
-				loopIndex = loopIndex + 1;
-			}; // end drawWaveShap loop
+
+			var drawFullWidthWaveShape = function(osc){
+				var loopIndex = 0;
+				for (var oscName in hogn.currentOscValues){
+					var oscValue = hogn.currentOscValues[osc];
+					var thisColor = hogn.globalColorObject[osc].heavy;
+					// Adds zoom scaling
+					oscValue = oscValue * osc1osc2ZoomFactor;
+					drawWaveShape(oscValue, thisColor) // This is the command which draws the colored waveform
+					loopIndex = loopIndex + 1;
+				}; // end drawWaveShape loop
+			}
+
+			// Call drawFullWidthWaveShape() here after checking on global settings.
+			if (hogn.waveFormVisible[0]){
+				drawFullWidthWaveShape('osc_1');
+			};
+			if(hogn.waveFormVisible[1]){
+				drawFullWidthWaveShape('osc_2');
+			}
+
+			// horizontal centerline
+			hogn.oscContext.beginPath();
+			hogn.oscContext.moveTo(canvasLeft, canvasVerticalCenter);
+			hogn.oscContext.lineTo(canvasRight, canvasVerticalCenter);
+			hogn.oscContext.strokeStyle = hogn.oscHorizontalLineColor;
+			hogn.oscContext.stroke();
 
 		};// end if_statement on whole function
 
@@ -734,62 +744,47 @@ var harmonyOscillatorsGlobalNamespace = {
 		var wave_1 = $('#wave_1');
 		var wave_2 = $('#wave_2');
 		var wave_3 = $('#wave_3');
-		if (hogn.waveFormVisible[0]){
-			wave_1.css("background-color", hogn.oscilloscopeWaveformColors[0]);
-		}else{
-			wave_1.css("background-color", hogn.oscilloscopeWaveformColorsLight[0]);
-		};
-		if (hogn.waveFormVisible[1]){
-			wave_2.css("background-color", hogn.oscilloscopeWaveformColors[1]);
-		}else{
-			wave_2.css("background-color", hogn.oscilloscopeWaveformColorsLight[1]);
-		};
-		if (hogn.waveFormVisible[2]){
-			wave_3.css("background-color", hogn.oscilloscopeWaveformColors[2]);
-		}else{
-			wave_3.css("background-color", hogn.oscilloscopeWaveformColorsLight[2]);
-		};
 
+		var initWaveEnableButtonColors = function(jquerySelector, waveFormVisible, colorSelector){
+			if (waveFormVisible){
+				jquerySelector.css("background-color", colorSelector.heavy);
+			}else{
+				jquerySelector.css("background-color", colorSelector.light);
+			};			
+		}
 
-		//  -------- Inititate button responsiveness here --------
+		initWaveEnableButtonColors(wave_1, hogn.waveFormVisible[0], hogn.globalColorObject.osc_1);
+		initWaveEnableButtonColors(wave_2, hogn.waveFormVisible[1], hogn.globalColorObject.osc_2);
+		initWaveEnableButtonColors(wave_3, hogn.waveFormVisible[2], hogn.globalColorObject.osc_3);
+
+		//   Inititate button responsiveness here 
 
 		// enable touchy responsive red coloring on interaction
 		$('.wave_enable_button').bind('touchstart',function(){
 			$(this).css('background-color','red');
 		});
 
-		wave_1.bind('mousedown touch', function(){
-			if (hogn.waveFormVisible[0]){ // true it is visible
-				hogn.waveFormVisible[0] = false;
-				$(this).css("background-color", hogn.oscilloscopeWaveformColorsLight[0]);
-			}else{
-				hogn.waveFormVisible[0] = true;
-				$(this).css("background-color", hogn.oscilloscopeWaveformColors[0]);
-			};
-			hogn.renderCanvas();
-		});
+		var initWaveEnableButtonResponse = function(jQuerySelector, waveFormVisible, colorSelector){
+			jQuerySelector.bind('mousedown touch', function(){
+				if (waveFormVisible){ // true it is visible
+					waveFormVisible = false;
+					$(this).css("background-color", colorSelector.light);
+					console.log(colorSelector)
+					console.log($(this))
+				}else{
+					waveFormVisible = true;
+					$(this).css("background-color", colorSelector.heavy);
+				};
+				console.log('just before render canvas')
+				hogn.renderCanvas();
+			});
+		}
 
-		wave_2.bind('mousedown touch', function(){
-			if (hogn.waveFormVisible[1]){ // true it is visible
-				hogn.waveFormVisible[1] = false;
-				$(this).css("background-color", hogn.oscilloscopeWaveformColorsLight[1]);
-			}else{
-				hogn.waveFormVisible[1] = true;
-				$(this).css("background-color", hogn.oscilloscopeWaveformColors[1]);
-			};
-			hogn.renderCanvas();
-		});
+		// Calls above function with following variables - jquerySelector, waveFormVisible, colorSelector
+		initWaveEnableButtonResponse(wave_1, hogn.waveFormVisible[0], hogn.globalColorObject.osc_1);
+		initWaveEnableButtonResponse(wave_2, hogn.waveFormVisible[1], hogn.globalColorObject.osc_2);
+		initWaveEnableButtonResponse(wave_3, hogn.waveFormVisible[2], hogn.globalColorObject.osc_3);
 
-		wave_3.bind('mousedown touch', function(){
-			if (hogn.waveFormVisible[2]){ // true it is visible
-				hogn.waveFormVisible[2] = false;
-				$(this).css("background-color", hogn.oscilloscopeWaveformColorsLight[2]);
-			}else{
-				hogn.waveFormVisible[2] = true;
-				$(this).css("background-color", hogn.oscilloscopeWaveformColors[2]);
-			};
-			hogn.renderCanvas();
-		});
 	},// End initCanvasWaveEnableButtons
 
 }; // End harmonyOscillatorsGlobalNamespace

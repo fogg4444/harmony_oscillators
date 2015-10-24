@@ -210,9 +210,35 @@ h1{
 	float: right;
 }
 
-#oscilliscope_zoom_div{
+#canvas_control_div{
+	width: 100%;
 	height: 5%;
 }
+	#wave_enable_buttons{
+		width: 20%;
+		height: 100%;
+		/*background-color: black;*/
+		float: left;
+	}
+	.wave_enable_button{
+		width: 33.33333%;
+		float: left;
+		height: 80%;
+		border-top: 1px solid #000000;
+		border-bottom: 1px solid #000000;
+	}
+	#wave_1{
+		border-left: 1px solid #000000;
+	}
+	#wave_3{
+		border-right: 1px solid #000000;
+	}
+
+	#oscilliscope_zoom_div{
+		height: 5%;
+		width: 80%;
+		float: right;
+	}
 
 #oscilloscope_div{
 	margin: 0 auto;
