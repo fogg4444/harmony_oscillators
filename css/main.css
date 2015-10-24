@@ -55,7 +55,7 @@ h1{
 	}
 
 	#button_header{
-		height: 10%;
+		height: 100%;
 		/*width: 80%;*/
 		/*border: red 1px solid;*/
 		position: relative;
@@ -65,9 +65,9 @@ h1{
 		.top_button{
 			/*text-align: center;*/
 			height: 100%;
-			width: 20%;
+			width: 12%;
 			/*position: absolute;*/
-			float: left;
+			float: right;
 			color: white;
 			cursor: default;
 
@@ -78,21 +78,18 @@ h1{
 			-webkit-border-radius: 10px;
 			border-radius: 10px;  /*future proofing */
 			-khtml-border-radius: 10px; /* for old Konqueror browsers */
+			background-color: grey;
 		}
-		.top_button div {
-		}
+
 		.top_button p{
 			/*padding: 0;*/
 			/*margin: 0;*/
 		}
 
-		#reset_button{
-			background-color: grey;
-		}
 		#master_volume_div{
 			position: relative;
 			top: 30%;
-			left: 63%;
+			left: 0%;
 			width: 35%;
 		}
 
