@@ -1,0 +1,11 @@
+{
+  "name": "harmony_oscillators",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/fogg4444/harmony_oscillators",
+  "author": "Brian Fogg <fogg4444@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/storage": "^1.7.0"
+  }
+}
