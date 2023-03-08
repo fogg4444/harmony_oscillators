@@ -111,7 +111,8 @@ var harmonyOscillatorsGlobalNamespace = {
 				start : [0],
 				range : {
 					'min' : 0,
-					'max' : 100
+					// Setting this to 50 to avoid clipping! Both oscillators are too loud when mixed
+					'max' : 50
 				},
 			});
 		};
@@ -793,6 +794,14 @@ var harmonyOscillatorsGlobalNamespace = {
 
 $(document).ready(function(){
 	// console.log("document ready");
+
+	// Fixes tone context issues
+	document.documentElement.addEventListener("mousedown", function() {
+		if (Tone.context.state !== 'running') {
+			Tone.context.resume();
+		}
+	})
+	
 	var hogn = harmonyOscillatorsGlobalNamespace;
 
 	Tone.Master.mute = true;
